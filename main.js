@@ -112,10 +112,8 @@
     if (p.link && p.link !== "#") { a.target = "_blank"; a.rel = "noopener"; }
     a.setAttribute("aria-label", p.title);
 
-    // image / placeholder
-    var ratio = p.ratio || 1.1;
+    // image / placeholder — uniform aspect ratio handled in CSS
     var imgwrap = el("div", "card__imgwrap");
-    imgwrap.style.paddingBottom = ratio * 100 + "%";
 
     if (p.image) {
       var img = el("img", "card__img");
@@ -157,25 +155,18 @@
     return wrap;
   }
 
-  /* ---- Build feed (2-column masonry) ---------------------- */
+  /* ---- Build feed (uniform grid) -------------------------- */
   function buildFeed() {
     document.getElementById("feed-label").textContent = SITE.indexLabel;
 
     var tab = document.getElementById("feed-tab");
     tab.textContent = SITE.category;
 
-    var left = document.getElementById("feed-col-left");
-    var right = document.getElementById("feed-col-right");
-    var isTwoCol = window.matchMedia("(min-width: 768px)").matches;
-
+    var grid = document.getElementById("feed-grid");
     PROJECTS.forEach(function (p, i) {
       var card = buildCard(p, i);
       card.style.setProperty("--delay", (i * 0.08).toFixed(2) + "s");
-      if (isTwoCol) {
-        (i % 2 === 0 ? left : right).appendChild(card);
-      } else {
-        left.appendChild(card);
-      }
+      grid.appendChild(card);
     });
 
     positionUnderline(tab);
