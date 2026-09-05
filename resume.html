@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    />
+    <title>Resume — Hanumant Kulkarni</title>
+    <meta name="description" content="Resume — Hanumant Kulkarni, Interaction Designer, IIT Bombay." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600&family=Poppins:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --dur-theme: 0.2s;
+        --ease-out-back: cubic-bezier(0.2, 0, 0, 1.4);
+        --c-accent: #2688ff;
+        /* LIGHT */
+        --grad-top: #cde4ff;
+        --bg: #ffffff;
+        --heading: #00489f;
+        --body: #4e4e4e;
+        --link: #2688ff;
+        --panel: #ffffff;
+        --border: rgba(20, 24, 40, 0.14);
+        color-scheme: light;
+      }
+      :root[data-theme="dark"] {
+        --grad-top: #1b2a3c;
+        --bg: #000000;
+        --heading: #ffffff;
+        --body: #d6d6d6;
+        --link: #2688ff;
+        --panel: #0d1520;
+        --border: rgba(220, 230, 245, 0.16);
+        color-scheme: dark;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+          --grad-top: #1b2a3c;
+          --bg: #000000;
+          --heading: #ffffff;
+          --body: #d6d6d6;
+          --link: #2688ff;
+          --panel: #0d1520;
+          --border: rgba(220, 230, 245, 0.16);
+          color-scheme: dark;
+        }
+      }
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html {
+        font-size: 17px;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+        touch-action: pan-x pan-y;
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+      }
+      body {
+        min-height: 100vh;
+        /* subtle top wash into the page colour — a whisper of the site's hero */
+        background: linear-gradient(180deg, var(--grad-top) 0%, var(--bg) 26%);
+        color: var(--body);
+        font-family: "Public Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        transition: color var(--dur-theme) ease, background-color var(--dur-theme) ease;
+      }
+      a { color: inherit; text-decoration: none; }
+
+      /* wider than cyze's 420px column — lesser margins for a document */
+      .rz {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 2.5rem 1.25rem 3rem;
+      }
+      @media (min-width: 640px) { .rz { padding: 3.5rem 2.5rem 4rem; } }
+
+      .rz__top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+      .rz__back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-family: "Poppins", sans-serif;
+        font-size: 15px;
+        color: var(--link);
+        transition: transform 0.2s var(--ease-out-back), color var(--dur-theme) ease;
+      }
+      .rz__back:hover { transform: translateX(-3px); }
+      .rz__back svg { width: 18px; height: 18px; }
+
+      /* two-dot theme switch (matches the home hero) */
+      .rz__dots { display: inline-flex; align-items: center; gap: 12px; }
+      .rz__dot {
+        position: relative; width: 16px; height: 16px; border-radius: 9999px;
+        border: 0; padding: 0; cursor: pointer; background: #b7b7b7;
+        transition: width 0.2s var(--ease-out-back), height 0.2s var(--ease-out-back), box-shadow 0.2s ease, background 0.2s ease;
+      }
+      .rz__dot::after {
+        content: ""; position: absolute; inset: 0; margin: auto; width: 0; height: 0;
+        border-radius: 9999px; background: var(--c-accent);
+        transition: width 0.2s var(--ease-out-back), height 0.2s var(--ease-out-back);
+      }
+      .rz__dot[data-active] { width: 26px; height: 26px; background: transparent; box-shadow: inset 0 0 0 3px var(--c-accent); }
+      .rz__dot[data-active]::after { width: 14px; height: 14px; }
+
+      .rz__title {
+        font-family: "Poppins", sans-serif;
+        font-size: 28px;
+        font-weight: 600;
+        color: var(--heading);
+        margin-top: 1.75rem;
+        transition: color var(--dur-theme) ease;
+      }
+      .rz__sub {
+        font-family: "Poppins", sans-serif;
+        font-size: 15px;
+        color: var(--body);
+        margin-top: 0.35rem;
+        transition: color var(--dur-theme) ease;
+      }
+
+      .rz__doc {
+        margin-top: 1.75rem;
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        background: var(--panel);
+        box-shadow: 0 18px 50px -24px rgba(0, 0, 0, 0.45);
+      }
+      .rz__frame {
+        display: block;
+        width: 100%;
+        height: min(84vh, 1180px);
+        border: 0;
+      }
+
+      .rz__hint {
+        margin-top: 0.9rem;
+        font-size: 13px;
+        color: var(--body);
+        opacity: 0.72;
+      }
+      .rz__hint a { color: var(--link); text-decoration: underline; text-underline-offset: 2px; }
+    </style>
+  </head>
+  <body>
+    <main class="rz">
+      <div class="rz__top">
+        <a class="rz__back" href="./" aria-label="Back to home">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M19 12H5M11 18l-6-6 6-6" />
+          </svg>
+          Back
+        </a>
+        <div class="rz__dots" id="theme-toggle" role="group" aria-label="Theme">
+          <button class="rz__dot" data-theme-set="light" type="button" aria-label="Light theme"></button>
+          <button class="rz__dot" data-theme-set="dark" type="button" aria-label="Dark theme"></button>
+        </div>
+      </div>
+
+      <h1 class="rz__title">Resume</h1>
+      <p class="rz__sub">Hanumant Kulkarni — Interaction Designer, IIT Bombay</p>
+
+      <div class="rz__doc">
+        <iframe class="rz__frame" src="resume.pdf#view=FitH&toolbar=1" title="Resume — Hanumant Kulkarni" loading="lazy"></iframe>
+      </div>
+      <p class="rz__hint">
+        Can’t see the document? <a href="resume.pdf" target="_blank" rel="noopener">Open the PDF in a new tab</a>.
+      </p>
+    </main>
+
+    <script>
+      (function () {
+        "use strict";
+        var root = document.documentElement;
+        var saved = null;
+        try { saved = localStorage.getItem("theme"); } catch (e) {}
+        if (saved === "light" || saved === "dark") root.setAttribute("data-theme", saved);
+
+        function currentTheme() {
+          var t = root.getAttribute("data-theme");
+          if (t === "light" || t === "dark") return t;
+          return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        }
+        function syncDots() {
+          var active = currentTheme();
+          document.querySelectorAll("#theme-toggle [data-theme-set]").forEach(function (d) {
+            var on = d.getAttribute("data-theme-set") === active;
+            if (on) d.setAttribute("data-active", ""); else d.removeAttribute("data-active");
+            d.setAttribute("aria-pressed", String(on));
+          });
+        }
+        document.querySelectorAll("#theme-toggle [data-theme-set]").forEach(function (d) {
+          d.addEventListener("click", function () {
+            var t = d.getAttribute("data-theme-set");
+            root.setAttribute("data-theme", t);
+            try { localStorage.setItem("theme", t); } catch (e) {}
+            syncDots();
+          });
+        });
+        syncDots();
+        if (window.matchMedia) {
+          window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function () {
+            if (!root.hasAttribute("data-theme")) syncDots();
+          });
+        }
+
+        /* lock zoom (match the rest of the site) */
+        window.addEventListener("wheel", function (e) { if (e.ctrlKey || e.metaKey) e.preventDefault(); }, { passive: false });
+        window.addEventListener("keydown", function (e) {
+          if ((e.ctrlKey || e.metaKey) && ["+", "-", "=", "0", "_"].indexOf(e.key) !== -1) e.preventDefault();
+        });
+        ["gesturestart", "gesturechange", "gestureend"].forEach(function (t) {
+          document.addEventListener(t, function (e) { e.preventDefault(); }, { passive: false });
+        });
+      })();
+    </script>
+  </body>
+</html>

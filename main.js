@@ -116,7 +116,8 @@
     links.forEach(function (l) {
       var a = el("a", "hero-link" + (l.accent ? " hero-link--accent" : ""));
       a.href = l.href || "#";
-      if (l.href && l.href !== "#") { a.target = "_blank"; a.rel = "noopener"; }
+      // external links open in a new tab; internal pages (e.g. resume.html) stay in-tab
+      if (l.href && /^https?:\/\//i.test(l.href)) { a.target = "_blank"; a.rel = "noopener"; }
       a.appendChild(el("span", "hero-link__icon", ICONS[l.icon] || ""));
       a.appendChild(el("span", "hero-link__label", l.label));
       (cols[l.col === 2 ? 2 : 1]).appendChild(a);
