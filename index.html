@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <!-- HERO (full-width gradient band) -->
+    <!-- HERO (full viewport; background lives on the page, not here) -->
     <header class="hero-band reveal">
       <div class="hero-band__inner">
         <section class="hero">
@@ -26,17 +26,10 @@
               <h1 class="hero__title" id="hero-title">Hi, I'm Hanumant</h1>
               <div class="hero__role" id="hero-role">Interaction Designer</div>
             </div>
-            <button
-              class="theme-dots"
-              id="theme-toggle"
-              type="button"
-              aria-label="Toggle dark mode"
-              aria-pressed="true"
-              title="Toggle theme"
-            >
-              <span class="theme-dots__dot theme-dots__dot--dark"></span>
-              <span class="theme-dots__dot theme-dots__dot--light"></span>
-            </button>
+            <div class="theme-dots" id="theme-toggle" role="group" aria-label="Theme">
+              <button class="theme-dots__dot theme-dots__dot--light" data-theme-set="light" type="button" aria-label="Light theme"></button>
+              <button class="theme-dots__dot theme-dots__dot--dark" data-theme-set="dark" type="button" aria-label="Dark theme"></button>
+            </div>
           </div>
           <div id="hero-copy"></div>
           <nav class="hero-links" id="hero-links" aria-label="Profile links"></nav>

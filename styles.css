@@ -5,76 +5,135 @@
    content lives in data.js.
    ============================================================= */
 
-/* ---- Design tokens --------------------------------------- */
+/* =============================================================
+   THEME TOKENS  —  one set of styles, driven by [data-theme].
+   Values pulled directly from the Figma hero (light & dark frames).
+   ============================================================= */
 :root {
   /* durations & easings */
   --dur-fast: 0.2s;
   --dur-base: 0.4s;
   --dur-slow: 0.5s;
+  --dur-theme: 0.2s; /* color cross-fade on theme switch */
   --ease-out-sharp: cubic-bezier(0.2, 0, 0, 1);
   --ease-out-back: cubic-bezier(0.2, 0, 0, 1.4);
 
-  /* accent (shared) */
-  --c-accent: oklch(66% 0.182 258);
-  --c-green: #99ff46; /* hero accent (from Figma) */
-  /* hero gradient — charcoal fading to the page background (light: to white) */
-  --hero-gradient: linear-gradient(
-    180deg,
-    #444444 0%, #616161 31%, #6b6b6b 38%,
-    #787878 48%, #8a8a8a 55%, var(--c-bg) 100%
-  );
+  --c-accent: #2688ff; /* link blue (shared) */
 
-  /* light palette */
-  --c-bg: oklch(98% 0.004 260);
-  --c-text: oklch(24% 0.045 275);
-  --c-muted: oklch(53% 0.07 270);
-  --c-border: oklch(30% 0.04 275 / 0.12);
-  --c-card: oklch(94% 0.006 260);
-  --c-mark: oklch(94% 0.006 260); /* faint footer watermark */
+  /* ---- LIGHT (default) — Figma frame "MacBook Pro 16' - 1" ---- */
+  --grad-top: #cde4ff;
+  --grad-bottom: #ffffff;
+  --dot: #8b8b8b;
+  --c-heading: #00489f;
+  --c-body: #4e4e4e;
+  --c-link: #2688ff;
+  --c-aboutme: #000000;
 
-  /* card geometry */
-  --card-radius: 2rem; /* 34px */
+  /* site tokens (feed / footer) */
+  --c-bg: var(--grad-bottom);
+  --c-text: #1c1c1e;
+  --c-muted: #6b6b6b;
+  --c-border: rgba(20, 24, 40, 0.12);
+  --c-card: #eef1f5;
+  --c-mark: #eef1f5;
+
+  --card-radius: 2rem;
   --btn-inset: 0.375rem;
-
   color-scheme: light;
 }
 
-html.dark {
-  --c-bg: oklch(23% 0.062 262);
-  --c-text: oklch(95% 0.02 268);
-  --c-muted: oklch(78% 0.045 270);
-  --c-border: oklch(90% 0.03 270 / 0.16);
-  --c-card: oklch(28% 0.035 272);
-  --c-mark: oklch(26.5% 0.058 262); /* faint footer watermark, a whisper above bg */
-  /* cleaner dark hero: charcoal fading straight into the dark page bg */
-  --hero-gradient: linear-gradient(180deg, #3c3c40 0%, #34343a 42%, var(--c-bg) 100%);
+/* dark tokens, applied by explicit choice OR by system pref on first load */
+:root[data-theme="dark"] {
+  --grad-top: #1b2a3c;
+  --grad-bottom: #000000;
+  --dot: #898989;
+  --c-heading: #ffffff;
+  --c-body: #d6d6d6;
+  --c-link: #2688ff;
+  --c-aboutme: #ffffff;
+
+  --c-bg: var(--grad-bottom);
+  --c-text: #ededf2;
+  --c-muted: #9aa3ad;
+  --c-border: rgba(220, 230, 245, 0.16);
+  --c-card: #14202e;
+  --c-mark: #0e1621;
   color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --grad-top: #1b2a3c;
+    --grad-bottom: #000000;
+    --dot: #898989;
+    --c-heading: #ffffff;
+    --c-body: #d6d6d6;
+    --c-link: #2688ff;
+    --c-aboutme: #ffffff;
+
+    --c-bg: var(--grad-bottom);
+    --c-text: #ededf2;
+    --c-muted: #9aa3ad;
+    --c-border: rgba(220, 230, 245, 0.16);
+    --c-card: #14202e;
+    --c-mark: #0e1621;
+    color-scheme: dark;
+  }
 }
 
 /* ---- Reset ------------------------------------------------ */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 html {
-  /* Reference uses a 17px root; the whole type + spacing scale derives from it. */
   font-size: 17px;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
 body {
-  background: var(--c-bg);
+  position: relative;
+  min-height: 100vh;
+  background: var(--grad-bottom);
   color: var(--c-text);
   font-family: "Public Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  font-size: 0.9375rem; /* 15.94px */
+  font-size: 0.9375rem;
   line-height: 1.75;
   letter-spacing: normal;
-  transition: background var(--dur-base) ease, color var(--dur-base) ease;
   overflow-x: hidden;
+  transition: color var(--dur-theme) ease, background-color var(--dur-theme) ease;
+}
+
+/* ---- Page background: vertical gradient + fading dot grid ----
+   Anchored to the whole document (absolute inset:0 on the page),
+   so scrolling never reveals a seam. Two layers behind all content. */
+body::before,
+body::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+body::before { /* gradient: top colour → exact #fff / #000 at the bottom */
+  z-index: -2;
+  background: linear-gradient(180deg, var(--grad-top) 0%, var(--grad-bottom) 100%);
+}
+body::after { /* dot grid — 4px dots (r=2), 68px spacing, fading out toward the bottom */
+  z-index: -1;
+  background-image: radial-gradient(circle, var(--dot) 1.6px, transparent 2px);
+  background-size: 68px 68px;
+  background-position: 44px 50px;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 55%, transparent 85%);
+          mask-image: linear-gradient(to bottom, #000 0%, #000 55%, transparent 85%);
 }
 
 ::selection { background: var(--c-accent); color: #fff; }
 
 a { color: inherit; text-decoration: none; }
+
+/* theme-aware colour cross-fade for feed / footer text (not layout) */
+.feed__label, .feed__tab, .card__caption, .card__caption-tag,
+.footer__tagline, .footer__link, .footer__top, .footer__mark {
+  transition: color var(--dur-theme) ease;
+}
 
 /* ---- Page frame ------------------------------------------ */
 .main {
@@ -96,23 +155,22 @@ a { color: inherit; text-decoration: none; }
   position: relative;
   width: 100%;
   min-height: 100vh;
-  display: flex;
-  align-items: flex-start;
-  background: var(--hero-gradient);
+  display: block;
   font-family: "Poppins", "Public Sans", ui-sans-serif, system-ui, sans-serif;
 }
 .hero-band__inner {
   width: 100%;
-  max-width: 1440px;
+  max-width: 1728px;
   margin: 0 auto;
   padding: 22vh 1.5rem 6rem;
 }
-@media (min-width: 640px) { .hero-band__inner { padding: 22vh 100px 6rem; } }
+/* content column sits at ~35% of the viewport on desktop (Figma left = 34.7%) */
+@media (min-width: 900px) { .hero-band__inner { padding: 22vh 0 6rem 34.7vw; } }
 
 .hero {
   position: relative;
-  max-width: 528px;
-  margin: 0 auto;
+  width: 528px;
+  max-width: 100%;
   display: flex;
   flex-direction: column;
 }
@@ -123,35 +181,38 @@ a { color: inherit; text-decoration: none; }
   font-family: inherit;
   font-size: 28px;
   font-weight: 600;
-  line-height: 1.3;
+  line-height: 1.35;
   letter-spacing: normal;
-  color: var(--c-green);
+  color: var(--c-heading);
+  transition: color var(--dur-theme) ease;
 }
 .hero__role {
   font-family: inherit;
   font-size: 20px;
   font-weight: 400;
   line-height: 1.4;
-  color: #ebebeb;
+  color: var(--c-body);
+  transition: color var(--dur-theme) ease;
 }
 
 .hero__p {
   font-family: inherit;
   font-size: 22px;
   font-weight: 400;
-  line-height: 1.35;
-  color: #ebebeb;
+  line-height: 1.4;
+  color: var(--c-body);
+  transition: color var(--dur-theme) ease;
 }
-.hero__p--first { margin-top: 2.25rem; }
-.hero__p + .hero__p { margin-top: 1.25rem; }
+.hero__p--first { margin-top: 2.5rem; }
+.hero__p + .hero__p { margin-top: 1.3rem; }
 
-/* ---- Hero links (two columns) ---------------------------- */
+/* ---- Hero links (two-column grid) ------------------------ */
 .hero-links {
   display: flex;
-  gap: 3.25rem;
-  margin-top: 2.5rem;
+  column-gap: 5rem;
+  margin-top: 2.75rem;
 }
-.hero-links__col { display: flex; flex-direction: column; gap: 0.5rem; }
+.hero-links__col { display: flex; flex-direction: column; row-gap: 0.55rem; }
 
 .hero-link {
   display: inline-flex;
@@ -161,14 +222,14 @@ a { color: inherit; text-decoration: none; }
   font-size: 16px;
   font-weight: 400;
   line-height: 1.4;
-  color: #ffffff;
+  color: var(--c-aboutme);
   width: max-content;
-  transition: opacity var(--dur-fast) ease, transform var(--dur-fast) var(--ease-out-back);
+  transition: transform var(--dur-fast) var(--ease-out-back), color var(--dur-theme) ease;
 }
 .hero-link:hover { transform: translateY(-2px); }
 .hero-link__icon { display: inline-flex; width: 21px; height: 21px; flex-shrink: 0; }
 .hero-link__icon svg { width: 100%; height: 100%; display: block; }
-.hero-link--accent { color: var(--c-green); }
+.hero-link--accent { color: var(--c-link); }
 .hero-link--accent .hero-link__label {
   text-decoration: underline;
   text-decoration-thickness: from-font;
@@ -177,28 +238,50 @@ a { color: inherit; text-decoration: none; }
 .hero-link:hover .hero-link__label { opacity: 0.85; }
 
 /* ---- Two-dot theme switch (from Figma) ------------------- */
+/* left dot = light, right dot = dark; the active theme's dot grows a
+   ring + filled blue centre, the inactive one is a plain gray dot. */
 .theme-dots {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  background: none;
-  border: 0;
-  cursor: pointer;
-  padding: 6px 4px;
-  min-height: 44px;
+  gap: 12px;
+  min-height: 32px;
+  margin-top: 4px;
 }
 .theme-dots__dot {
-  width: 15px;
-  height: 15px;
+  position: relative;
+  width: 16px;
+  height: 16px;
   border-radius: 9999px;
-  transition: box-shadow var(--dur-fast) ease, background var(--dur-fast) ease;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  background: #b7b7b7;
+  transition: width var(--dur-fast) var(--ease-out-back),
+              height var(--dur-fast) var(--ease-out-back),
+              box-shadow var(--dur-fast) ease,
+              background var(--dur-fast) ease;
 }
-.theme-dots__dot--dark { background: #2b2b2b; }
-.theme-dots__dot--light { background: #cfcfcf; }
-/* the dot for the active theme gets a light ring */
-html.dark .theme-dots__dot--dark { box-shadow: 0 0 0 2px #f2f2f2, 0 0 0 4px rgba(0, 0, 0, 0.18); }
-html:not(.dark) .theme-dots__dot--light { box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px rgba(0, 0, 0, 0.28); }
-.theme-dots:hover .theme-dots__dot { opacity: 0.85; }
+.theme-dots__dot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 0;
+  height: 0;
+  border-radius: 9999px;
+  background: var(--c-accent);
+  transition: width var(--dur-fast) var(--ease-out-back), height var(--dur-fast) var(--ease-out-back);
+}
+.theme-dots__dot:hover { background: #a2a2a2; }
+/* active dot: larger, ring + blue centre */
+.theme-dots__dot[data-active] {
+  width: 26px;
+  height: 26px;
+  background: transparent;
+  box-shadow: inset 0 0 0 3px var(--c-accent);
+}
+.theme-dots__dot[data-active]::after { width: 14px; height: 14px; }
+.theme-dots__dot[data-active]:hover { background: transparent; }
 
 /* =============================================================
    INDEX  /  project feed

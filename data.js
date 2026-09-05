@@ -83,16 +83,4 @@ const PROJECTS = [
     link: "#",
     ratio: 1.2,
   },
-  {
-    title: "Project Four",
-    category: "Design Systems",
-    link: "#",
-    ratio: 0.92,
-  },
-  {
-    title: "Project Five",
-    category: "Motion & Interaction",
-    link: "#",
-    ratio: 1.28,
-  },
 ];

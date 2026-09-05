@@ -5,16 +5,32 @@
 (function () {
   "use strict";
 
-  /* ---- Theme (light by default to match the hero design) --- */
+  /* ---- Theme via [data-theme]; respects system on first load --- */
   var root = document.documentElement;
   var saved;
   try { saved = localStorage.getItem("theme"); } catch (e) { saved = null; }
-  if (saved === "dark") root.classList.add("dark");
-  else root.classList.remove("dark"); // default light
+  // Only stamp data-theme when the viewer has chosen; otherwise leave it
+  // unset so prefers-color-scheme drives the first render.
+  if (saved === "light" || saved === "dark") root.setAttribute("data-theme", saved);
 
-  function setTheme(dark) {
-    root.classList.toggle("dark", dark);
-    try { localStorage.setItem("theme", dark ? "dark" : "light"); } catch (e) {}
+  function currentTheme() {
+    var t = root.getAttribute("data-theme");
+    if (t === "light" || t === "dark") return t;
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  }
+  function setTheme(theme) {
+    root.setAttribute("data-theme", theme);
+    try { localStorage.setItem("theme", theme); } catch (e) {}
+    syncThemeDots();
+  }
+  function syncThemeDots() {
+    var active = currentTheme(); // "light" | "dark"
+    document.querySelectorAll("#theme-toggle [data-theme-set]").forEach(function (dot) {
+      var isActive = dot.getAttribute("data-theme-set") === active;
+      if (isActive) dot.setAttribute("data-active", "");
+      else dot.removeAttribute("data-active");
+      dot.setAttribute("aria-pressed", String(isActive));
+    });
   }
 
   /* ---- Small helpers -------------------------------------- */
@@ -234,16 +250,18 @@
     buildFooter();
 
     var toggle = document.getElementById("theme-toggle");
-    function syncToggle() {
-      var dark = root.classList.contains("dark");
-      toggle.setAttribute("aria-pressed", String(dark));
-      toggle.setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
+    if (toggle) {
+      toggle.querySelectorAll("[data-theme-set]").forEach(function (dot) {
+        dot.addEventListener("click", function () { setTheme(dot.getAttribute("data-theme-set")); });
+      });
     }
-    syncToggle();
-    toggle.addEventListener("click", function () {
-      setTheme(!root.classList.contains("dark"));
-      syncToggle();
-    });
+    syncThemeDots();
+    // follow the OS theme while the viewer hasn't chosen one
+    if (window.matchMedia) {
+      window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function () {
+        if (!root.hasAttribute("data-theme")) syncThemeDots();
+      });
+    }
 
     observeReveals();
 
