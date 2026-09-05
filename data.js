@@ -32,10 +32,10 @@ const SITE = {
     // or edit the href/label to your real profiles.
     links: [
       { label: "linkedin.com/in/hanumant-kulkarni", href: "https://www.linkedin.com/in/hanumant-kulkarni-b0b96631a/" },
-      // NOTE: the "Behance" URL you sent was actually a LinkedIn link, so this
-      // points to your Behance handle as a placeholder — swap in your real
-      // Behance profile URL here.
-      { label: "behance.net/hanumant", href: "https://www.behance.net/" },
+      // NOTE: the URL you sent for Behance is your LinkedIn URL, so this link
+      // currently opens LinkedIn. Replace the href below with your real
+      // Behance profile URL (e.g. https://www.behance.net/your-handle).
+      { label: "behance.net/hanumant", href: "https://www.linkedin.com/in/hanumant-kulkarni-b0b96631a/" },
     ],
     // The giant faint wordmark at the very bottom. Keep it short (one word
     // reads best); it renders as a soft watermark behind the links.
