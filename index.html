@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hanumant Kulkarni, Interaction Designer</title>
+    <meta
+      name="description"
+      content="Hanumant Kulkarni — Interaction Designer studying Interaction Design at IIT Bombay. Selected projects."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="main">
+      <!-- HERO -->
+      <div class="sky-band reveal">
+        <div class="sky-band__sky"></div>
+        <div class="sky-band__content">
+          <section class="hero">
+            <div class="hero__top">
+              <div>
+                <h1 class="hero__title" id="hero-title">Hi, I'm Hanumant</h1>
+                <div class="hero__role" id="hero-role">Interaction Designer</div>
+              </div>
+              <button
+                class="toggle"
+                id="theme-toggle"
+                type="button"
+                aria-label="Toggle dark mode"
+                aria-pressed="true"
+                title="Toggle theme"
+              >
+                <span class="toggle__track">
+                  <span class="toggle__thumb">
+                    <svg class="toggle__icon toggle__icon--sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <circle cx="12" cy="12" r="4.2"/>
+                      <path d="M12 2.4v2.4M12 19.2v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.4 12h2.4M19.2 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"/>
+                    </svg>
+                    <svg class="toggle__icon toggle__icon--moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <path d="M20.4 14.6A8.2 8.2 0 0 1 9.4 3.6a8.2 8.2 0 1 0 11 11z"/>
+                    </svg>
+                  </span>
+                </span>
+              </button>
+            </div>
+            <div id="hero-copy"></div>
+          </section>
+        </div>
+      </div>
+
+      <!-- INDEX / PROJECT FEED -->
+      <section class="feed">
+        <div class="feed__head">
+          <h2 class="feed__label" id="feed-label">Index</h2>
+          <div class="feed__tabs">
+            <button class="feed__tab is-active" id="feed-tab" type="button">Projects</button>
+            <span class="feed__underline" id="feed-underline"></span>
+          </div>
+        </div>
+        <div class="feed__grid" id="feed-grid">
+          <div class="feed__col feed__col--left" id="feed-col-left"></div>
+          <div class="feed__col feed__col--right" id="feed-col-right"></div>
+        </div>
+      </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="footer__frame">
+        <div class="footer__tagline">
+          <span class="footer__place" id="footer-place"></span>
+          <span class="footer__quip" id="footer-quip"></span>
+        </div>
+        <ul class="footer__socials" id="footer-socials"></ul>
+        <p class="footer__mark" id="footer-mark" aria-hidden="true"></p>
+      </div>
+    </footer>
+
+    <script src="data.js"></script>
+    <script src="main.js"></script>
+  </body>
+</html>
