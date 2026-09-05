@@ -5,12 +5,12 @@
 (function () {
   "use strict";
 
-  /* ---- Theme (dark by default, remembered per browser) ---- */
+  /* ---- Theme (light by default to match the hero design) --- */
   var root = document.documentElement;
   var saved;
   try { saved = localStorage.getItem("theme"); } catch (e) { saved = null; }
-  if (saved === "light") root.classList.remove("dark");
-  else root.classList.add("dark"); // default dark, matches reference
+  if (saved === "dark") root.classList.add("dark");
+  else root.classList.remove("dark"); // default light
 
   function setTheme(dark) {
     root.classList.toggle("dark", dark);
@@ -39,6 +39,18 @@
     "oklch(43% 0.05 250)",
   ];
 
+  // Hero-link glyphs (24x24 viewBox).
+  var ICONS = {
+    linkedin:
+      '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.98 3.5A2.5 2.5 0 1 1 0 3.5a2.5 2.5 0 0 1 4.98 0zM.25 8.25h4.45V23H.25zM8.1 8.25h4.27v2.02h.06c.6-1.13 2.05-2.32 4.22-2.32 4.51 0 5.34 2.97 5.34 6.83V23h-4.45v-6.53c0-1.56-.03-3.56-2.17-3.56-2.17 0-2.5 1.7-2.5 3.45V23H8.1z"/></svg>',
+    behance:
+      '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8.3 6.9c.66 0 1.26.06 1.8.18.54.1 1 .3 1.38.55.38.26.68.6.89 1.04.2.43.3.97.3 1.6 0 .69-.15 1.26-.47 1.72-.31.45-.78.83-1.4 1.12.85.24 1.48.67 1.9 1.28.42.6.62 1.34.62 2.19 0 .69-.13 1.29-.4 1.79-.27.5-.63.92-1.09 1.24-.45.32-.98.56-1.57.71-.59.15-1.2.23-1.82.23H2V6.9zm-.36 4.85c.54 0 .98-.13 1.33-.38.34-.26.51-.67.51-1.25 0-.32-.06-.58-.17-.79-.12-.2-.28-.36-.48-.47-.2-.11-.43-.19-.69-.23-.26-.05-.53-.07-.81-.07H4.9v3.19zm.16 5.09c.3 0 .58-.03.85-.09.27-.05.5-.15.7-.28.2-.14.37-.32.49-.55.12-.23.18-.53.18-.89 0-.7-.2-1.2-.59-1.5-.39-.3-.92-.45-1.57-.45H4.9v3.76zM16.5 16.9c.37.36.9.54 1.6.54.5 0 .93-.13 1.29-.38.36-.25.58-.52.66-.8h2.36c-.38 1.17-.96 2.01-1.74 2.51-.78.5-1.73.75-2.83.75-.77 0-1.46-.12-2.08-.37-.62-.24-1.14-.59-1.57-1.04-.43-.45-.76-.98-.99-1.61-.23-.62-.35-1.31-.35-2.06 0-.73.12-1.4.36-2.02.24-.62.58-1.16 1.02-1.61.44-.45.96-.81 1.57-1.06.61-.26 1.28-.39 2.02-.39.82 0 1.54.16 2.15.48.61.32 1.11.74 1.5 1.28.39.53.67 1.14.84 1.83.17.68.23 1.4.18 2.15h-6.99c0 .77.19 1.34.55 1.71zM19.4 12c-.29-.32-.76-.5-1.38-.5-.4 0-.74.07-1 .21-.27.14-.48.31-.64.51-.16.2-.27.42-.33.64-.06.22-.1.42-.11.6h4.32c-.06-.68-.29-1.16-.58-1.46zM14.7 7.34h5.4V8.7h-5.4z"/></svg>',
+    resume:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg>',
+    arrow:
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg>',
+  };
+
   /* ---- Build hero ----------------------------------------- */
   function buildHero() {
     document.getElementById("hero-title").textContent = "Hi, I'm " + SITE.name;
@@ -49,6 +61,27 @@
       var p = el("p", "hero__p" + (i === 0 ? " hero__p--first" : ""), para);
       wrap.appendChild(p);
     });
+
+    buildHeroLinks();
+  }
+
+  function buildHeroLinks() {
+    var nav = document.getElementById("hero-links");
+    if (!nav) return;
+    var links = SITE.heroLinks || [];
+    if (!links.length) { nav.style.display = "none"; return; }
+
+    var cols = { 1: el("div", "hero-links__col"), 2: el("div", "hero-links__col") };
+    links.forEach(function (l) {
+      var a = el("a", "hero-link" + (l.accent ? " hero-link--accent" : ""));
+      a.href = l.href || "#";
+      if (l.href && l.href !== "#") { a.target = "_blank"; a.rel = "noopener"; }
+      a.appendChild(el("span", "hero-link__icon", ICONS[l.icon] || ""));
+      a.appendChild(el("span", "hero-link__label", l.label));
+      (cols[l.col === 2 ? 2 : 1]).appendChild(a);
+    });
+    nav.appendChild(cols[1]);
+    nav.appendChild(cols[2]);
   }
 
   /* ---- Build one project card ----------------------------- */

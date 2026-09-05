@@ -18,6 +18,17 @@ const SITE = {
     "I currently study Interaction Design at IIT&nbsp;Bombay.",
   ],
 
+  // ---- Hero links (shown under the intro) ------------------
+  // Rendered in two columns: `col: 1` on the left, `col: 2` on the right.
+  // `icon` picks a built-in glyph: linkedin | behance | resume | arrow.
+  // `accent: true` uses the green accent + underline; otherwise plain text.
+  heroLinks: [
+    { label: "LinkedIn", href: "https://www.linkedin.com/in/hanumant-kulkarni-b0b96631a/", icon: "linkedin", col: 1, accent: true },
+    { label: "Behance",  href: "https://www.behance.net/hanumankulkarn1",                   icon: "behance",  col: 1, accent: true },
+    { label: "Resume",   href: "#",                                                          icon: "resume",   col: 2, accent: true },
+    { label: "About me", href: "#",                                                          icon: "arrow",    col: 2, accent: false },
+  ],
+
   // ---- Index label -----------------------------------------
   // Only one category, exactly as requested.
   indexLabel: "Index",
@@ -32,10 +43,7 @@ const SITE = {
     // or edit the href/label to your real profiles.
     links: [
       { label: "linkedin.com/in/hanumant-kulkarni", href: "https://www.linkedin.com/in/hanumant-kulkarni-b0b96631a/" },
-      // NOTE: the URL you sent for Behance is your LinkedIn URL, so this link
-      // currently opens LinkedIn. Replace the href below with your real
-      // Behance profile URL (e.g. https://www.behance.net/your-handle).
-      { label: "behance.net/hanumant", href: "https://www.linkedin.com/in/hanumant-kulkarni-b0b96631a/" },
+      { label: "behance.net/hanumankulkarn1", href: "https://www.behance.net/hanumankulkarn1" },
     ],
     // The giant faint wordmark at the very bottom. Keep it short (one word
     // reads best); it renders as a soft watermark behind the links.
