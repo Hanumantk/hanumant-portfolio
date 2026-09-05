@@ -33,6 +33,31 @@
     });
   }
 
+  /* ---- Lock zoom (pinch, ctrl+wheel, keyboard, double-tap) --- */
+  (function lockZoom() {
+    // ctrl/⌘ + mouse-wheel / trackpad pinch (desktop)
+    window.addEventListener("wheel", function (e) {
+      if (e.ctrlKey || e.metaKey) e.preventDefault();
+    }, { passive: false });
+    // ctrl/⌘ + (+ / - / = / 0) keyboard zoom
+    window.addEventListener("keydown", function (e) {
+      if ((e.ctrlKey || e.metaKey) && ["+", "-", "=", "0", "_"].indexOf(e.key) !== -1) {
+        e.preventDefault();
+      }
+    });
+    // iOS Safari pinch gestures
+    ["gesturestart", "gesturechange", "gestureend"].forEach(function (t) {
+      document.addEventListener(t, function (e) { e.preventDefault(); }, { passive: false });
+    });
+    // double-tap to zoom (touch)
+    var lastTouch = 0;
+    document.addEventListener("touchend", function (e) {
+      var now = Date.now();
+      if (now - lastTouch <= 300) e.preventDefault();
+      lastTouch = now;
+    }, { passive: false });
+  })();
+
   /* ---- Small helpers -------------------------------------- */
   function el(tag, cls, html) {
     var n = document.createElement(tag);
