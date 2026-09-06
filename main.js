@@ -531,9 +531,10 @@
       if (pre && pre.parentNode) pre.parentNode.removeChild(pre);
       return;
     }
-    // Full intro on every load so the opening always reads (research / design
-    // / code reveal, then the wipe). ~1.4s hold lets the three words land.
-    var hold = 1400;
+    // Full intro on every load so the opening always reads: research / design /
+    // code wipe in as the loading bar fills, then the panel wipes up. Slower,
+    // deliberate — ~2.05s lets the words land and the bar reach full.
+    var hold = 2050;
     var done = function () {
       pre.removeEventListener("transitionend", done);
       if (pre.parentNode) pre.parentNode.removeChild(pre);
