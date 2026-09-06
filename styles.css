@@ -223,6 +223,15 @@ body.dotfield-on::after { display: none; }
 @keyframes pl-safety { to { opacity: 0; visibility: hidden; pointer-events: none; } }
 @media (prefers-reduced-motion: reduce) { .js #preloader { display: none !important; } }
 
+/* theme switch: radial reveal (the new theme clips in over the old, no fade) */
+::view-transition-old(root) { animation: none; }
+::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(root),
+  ::view-transition-old(root),
+  ::view-transition-new(root) { animation: none !important; }
+}
+
 ::selection { background: var(--c-accent); color: #fff; }
 
 a { color: inherit; text-decoration: none; }

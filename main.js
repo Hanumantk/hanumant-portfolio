@@ -19,11 +19,11 @@
     light: { "--grad-top": "#cde4ff", "--grad-bottom": "#ffffff", "--dot": "#8b8b8b",
              "--c-heading": "#00489f", "--c-body": "#4e4e4e", "--c-text": "#1c1c1e",
              "--c-muted": "#6b6b6b", "--c-card": "#eef1f5", "--c-mark": "#eef1f5",
-             "--c-border": "rgba(20,24,40,0.12)", "--c-aboutme": "#000000" },
+             "--c-border": "rgba(20,24,40,0.12)" },
     dark:  { "--grad-top": "#1b2a3c", "--grad-bottom": "#000000", "--dot": "#898989",
              "--c-heading": "#ffffff", "--c-body": "#d6d6d6", "--c-text": "#ededf2",
              "--c-muted": "#9aa3ad", "--c-card": "#14202e", "--c-mark": "#0e1621",
-             "--c-border": "rgba(220,230,245,0.16)", "--c-aboutme": "#ffffff" },
+             "--c-border": "rgba(220,230,245,0.16)" },
   };
   var TWEEN_VARS = Object.keys(THEME.light);
   var ACCENT = [38, 136, 255]; // #2688ff
@@ -69,7 +69,6 @@
   }
   var themeName = currentTheme();
   var themeRAF = null;
-  var themeSafety = null;
   var dotField = null;
 
   function clearTweenVars() { TWEEN_VARS.forEach(function (v) { root.style.removeProperty(v); }); }
@@ -81,6 +80,12 @@
     root.setAttribute("data-theme", theme);
     if (dotField) dotField.setBase(THEME[theme]["--dot"]);
   }
+  function toggleOrigin() {
+    var t = document.getElementById("theme-toggle");
+    if (!t) return { x: window.innerWidth - 60, y: 80 };
+    var r = t.getBoundingClientRect();
+    return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+  }
   function setTheme(theme, animate) {
     var prev = themeName;
     themeName = theme;
@@ -88,10 +93,24 @@
     syncThemeDots();
 
     var canMotion = animate && !prefersReduced() && !document.hidden;
+
+    // Radial reveal of the new theme sweeping from the toggle (View Transitions).
+    if (canMotion && document.startViewTransition) {
+      var o = toggleOrigin();
+      var reach = Math.hypot(Math.max(o.x, window.innerWidth - o.x), Math.max(o.y, window.innerHeight - o.y));
+      var vt = document.startViewTransition(function () { applyThemeInstant(theme); });
+      vt.ready.then(function () {
+        root.animate(
+          { clipPath: ["circle(0px at " + o.x + "px " + o.y + "px)", "circle(" + reach + "px at " + o.x + "px " + o.y + "px)"] },
+          { duration: 620, easing: "cubic-bezier(.4,0,.2,1)", pseudoElement: "::view-transition-new(root)" }
+        );
+      }).catch(function () {});
+      return;
+    }
+
     if (!canMotion || !window.requestAnimationFrame) { applyThemeInstant(theme); return; }
 
-    // One system: interpolate every colour var (gradient, text, dots) via rAF —
-    // smooth crossfade, no snapshot cost, no end-of-animation hitch.
+    // Fallback (no View Transitions): interpolate the colour vars via rAF.
     var cs = getComputedStyle(root);
     var from = TWEEN_VARS.map(function (v) {
       var val = cs.getPropertyValue(v).trim();
@@ -112,13 +131,8 @@
       }
       if (dotField) dotField.setBase(fmtColor(lerpC(fromDot, toDot, e)));
       if (t < 1) { themeRAF = requestAnimationFrame(step); }
-      else { themeRAF = null; clearTimeout(themeSafety); clearTweenVars(); if (dotField) dotField.setBase(THEME[theme]["--dot"]); }
+      else { themeRAF = null; clearTweenVars(); if (dotField) dotField.setBase(THEME[theme]["--dot"]); }
     })(start);
-    // safety: if rAF stalls (tab blurred mid-tween), snap to the final theme
-    clearTimeout(themeSafety);
-    themeSafety = setTimeout(function () {
-      if (themeRAF) { applyThemeInstant(theme); }
-    }, dur + 700);
   }
 
   function syncThemeDots() {
