@@ -544,6 +544,15 @@
       // intro words lift out, then the whole panel wipes upward to reveal it.
       playEntrance(words);
       if (dotField && dotField.ignite) dotField.ignite();
+      // transition into the hero: the whole content group drifts up + settles
+      // from a slightly zoomed state as the curtain lifts (a "push into" reveal)
+      var inner = document.querySelector(".hero-band__inner");
+      if (inner && !document.hidden && inner.animate) {
+        inner.animate(
+          [{ transform: "translateY(26px) scale(1.03)" }, { transform: "none" }],
+          { duration: 1050, delay: 300, easing: "cubic-bezier(0.23,1,0.32,1)", fill: "both" }
+        ).addEventListener("finish", function () { inner.style.transform = "none"; });
+      }
       pre.classList.add("is-leaving");
       setTimeout(function () {
         pre.classList.add("is-done");

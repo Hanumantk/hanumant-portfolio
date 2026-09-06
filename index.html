@@ -37,18 +37,14 @@
 
     <!-- HERO (full viewport; background lives on the page, not here) -->
     <header class="hero-band">
+      <div class="theme-dots" id="theme-toggle" role="group" aria-label="Theme">
+        <button class="theme-dots__dot theme-dots__dot--light" data-theme-set="light" type="button" aria-label="Light theme"></button>
+        <button class="theme-dots__dot theme-dots__dot--dark" data-theme-set="dark" type="button" aria-label="Dark theme"></button>
+      </div>
       <div class="hero-band__inner">
         <section class="hero">
-          <div class="hero__top">
-            <div>
-              <h1 class="hero__title" id="hero-title">Hi, I'm Hanumant</h1>
-              <div class="hero__role" id="hero-role">Interaction Designer</div>
-            </div>
-            <div class="theme-dots" id="theme-toggle" role="group" aria-label="Theme">
-              <button class="theme-dots__dot theme-dots__dot--light" data-theme-set="light" type="button" aria-label="Light theme"></button>
-              <button class="theme-dots__dot theme-dots__dot--dark" data-theme-set="dark" type="button" aria-label="Dark theme"></button>
-            </div>
-          </div>
+          <h1 class="hero__title" id="hero-title">Hi, I'm Hanumant</h1>
+          <div class="hero__role" id="hero-role">Interaction Designer</div>
           <div id="hero-copy"></div>
           <nav class="hero-links" id="hero-links" aria-label="Profile links"></nav>
         </section>
