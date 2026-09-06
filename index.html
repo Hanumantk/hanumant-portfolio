@@ -6,6 +6,11 @@
       name="viewport"
       content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
     />
+    <script>
+      /* progressive-enhancement gate: applied before first paint so animated
+         elements start hidden only when JS is available (static frame if not) */
+      document.documentElement.classList.add("js");
+    </script>
     <title>Hanumant Kulkarni, Interaction Designer</title>
     <meta
       name="description"
@@ -20,8 +25,14 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <!-- PRELOADER (JS-only; skipped under reduced motion) -->
+    <div id="preloader" aria-hidden="true">
+      <div class="preloader__name">Hanumant</div>
+      <div class="preloader__dots"><i></i><i></i><i></i><i></i><i></i></div>
+    </div>
+
     <!-- HERO (full viewport; background lives on the page, not here) -->
-    <header class="hero-band reveal">
+    <header class="hero-band">
       <div class="hero-band__inner">
         <section class="hero">
           <div class="hero__top">
