@@ -257,9 +257,7 @@ a { color: inherit; text-decoration: none; }
   position: relative;
   width: 100%;
   min-height: 100vh;
-  display: flex;
-  align-items: center;      /* hero content centred in the viewport */
-  justify-content: center;
+  display: block;
   font-family: "Poppins", "Public Sans", ui-sans-serif, system-ui, sans-serif;
 }
 .hero-band__inner {
@@ -268,28 +266,20 @@ a { color: inherit; text-decoration: none; }
   width: 100%;
   max-width: 1728px;
   margin: 0 auto;
-  padding: 12vh 1.5rem 12vh;
-  display: flex;
-  justify-content: center;
+  padding: 22vh 1.5rem 6rem;
 }
+/* content column sits at ~35% of the viewport on desktop (Figma left = 34.7%) */
+@media (min-width: 900px) { .hero-band__inner { padding: 22vh 0 6rem 34.7vw; } }
 
 .hero {
   position: relative;
-  width: 560px;
+  width: 528px;
   max-width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;      /* centre the text block */
-  text-align: center;
 }
 
-/* theme switch pinned to the top-right corner (out of the centred column) */
-.theme-dots {
-  position: fixed;
-  top: clamp(20px, 3.5vh, 34px);
-  right: clamp(20px, 3.5vw, 40px);
-  z-index: 6;
-}
+.hero__top { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
 
 /* Uniform hero type — everything matches the "Interaction Designer" size (20px) */
 .hero__title {
@@ -318,11 +308,10 @@ a { color: inherit; text-decoration: none; }
 .hero__p--first { margin-top: 2.5rem; }
 .hero__p + .hero__p { margin-top: 1.3rem; }
 
-/* ---- Hero links (two-column grid, centred) --------------- */
+/* ---- Hero links (two-column grid) ------------------------ */
 .hero-links {
   display: flex;
-  justify-content: center;
-  column-gap: 4.5rem;
+  column-gap: 5rem;
   margin-top: 2.75rem;
 }
 .hero-links__col { display: flex; flex-direction: column; row-gap: 0.55rem; }
