@@ -129,6 +129,7 @@ body::after { /* dot grid — 4px dots (r=2), 68px spacing; confined to the hero
   z-index: -1;
   top: 0; left: 0; right: 0; bottom: auto;
   height: 100vh;
+  opacity: 0.66; /* keep the dots quiet behind the hero text */
   background-image: radial-gradient(circle, var(--dot) 1.6px, transparent 2px);
   background-size: 68px 68px;
   background-position: 44px 50px;
@@ -222,15 +223,6 @@ body.dotfield-on::after { display: none; }
 @keyframes pl-safety { to { opacity: 0; visibility: hidden; pointer-events: none; } }
 @media (prefers-reduced-motion: reduce) { .js #preloader { display: none !important; } }
 
-/* theme switch: radial reveal (the new theme clips in over the old, no fade) */
-::view-transition-old(root) { animation: none; }
-::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
-@media (prefers-reduced-motion: reduce) {
-  ::view-transition-group(root),
-  ::view-transition-old(root),
-  ::view-transition-new(root) { animation: none !important; }
-}
-
 ::selection { background: var(--c-accent); color: #fff; }
 
 a { color: inherit; text-decoration: none; }
@@ -266,10 +258,10 @@ a { color: inherit; text-decoration: none; }
   width: 100%;
   max-width: 1728px;
   margin: 0 auto;
-  padding: 22vh 1.5rem 6rem;
+  padding: 26vh 1.5rem 6rem;
 }
 /* content column sits at ~35% of the viewport on desktop (Figma left = 34.7%) */
-@media (min-width: 900px) { .hero-band__inner { padding: 22vh 0 6rem 34.7vw; } }
+@media (min-width: 900px) { .hero-band__inner { padding: 26vh 0 6rem 34.7vw; } }
 
 .hero {
   position: relative;

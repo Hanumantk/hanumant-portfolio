@@ -19,11 +19,11 @@
     light: { "--grad-top": "#cde4ff", "--grad-bottom": "#ffffff", "--dot": "#8b8b8b",
              "--c-heading": "#00489f", "--c-body": "#4e4e4e", "--c-text": "#1c1c1e",
              "--c-muted": "#6b6b6b", "--c-card": "#eef1f5", "--c-mark": "#eef1f5",
-             "--c-border": "rgba(20,24,40,0.12)" },
+             "--c-border": "rgba(20,24,40,0.12)", "--c-aboutme": "#000000" },
     dark:  { "--grad-top": "#1b2a3c", "--grad-bottom": "#000000", "--dot": "#898989",
              "--c-heading": "#ffffff", "--c-body": "#d6d6d6", "--c-text": "#ededf2",
              "--c-muted": "#9aa3ad", "--c-card": "#14202e", "--c-mark": "#0e1621",
-             "--c-border": "rgba(220,230,245,0.16)" },
+             "--c-border": "rgba(220,230,245,0.16)", "--c-aboutme": "#ffffff" },
   };
   var TWEEN_VARS = Object.keys(THEME.light);
   var ACCENT = [38, 136, 255]; // #2688ff
@@ -69,6 +69,7 @@
   }
   var themeName = currentTheme();
   var themeRAF = null;
+  var themeSafety = null;
   var dotField = null;
 
   function clearTweenVars() { TWEEN_VARS.forEach(function (v) { root.style.removeProperty(v); }); }
@@ -80,13 +81,6 @@
     root.setAttribute("data-theme", theme);
     if (dotField) dotField.setBase(THEME[theme]["--dot"]);
   }
-  function toggleOrigin() {
-    var t = document.getElementById("theme-toggle");
-    if (!t) return { x: window.innerWidth - 60, y: 80 };
-    var r = t.getBoundingClientRect();
-    return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
-  }
-
   function setTheme(theme, animate) {
     var prev = themeName;
     themeName = theme;
@@ -94,24 +88,10 @@
     syncThemeDots();
 
     var canMotion = animate && !prefersReduced() && !document.hidden;
-
-    // Award-level: a radial reveal of the new theme sweeping from the toggle.
-    if (canMotion && document.startViewTransition) {
-      var o = toggleOrigin();
-      var reach = Math.hypot(Math.max(o.x, window.innerWidth - o.x), Math.max(o.y, window.innerHeight - o.y));
-      var vt = document.startViewTransition(function () { applyThemeInstant(theme); });
-      vt.ready.then(function () {
-        root.animate(
-          { clipPath: ["circle(0px at " + o.x + "px " + o.y + "px)", "circle(" + reach + "px at " + o.x + "px " + o.y + "px)"] },
-          { duration: 620, easing: "cubic-bezier(.4,0,.2,1)", pseudoElement: "::view-transition-new(root)" }
-        );
-      }).catch(function () {});
-      return;
-    }
-
     if (!canMotion || !window.requestAnimationFrame) { applyThemeInstant(theme); return; }
 
-    // Fallback (no View Transitions): interpolate the colour vars via rAF.
+    // One system: interpolate every colour var (gradient, text, dots) via rAF —
+    // smooth crossfade, no snapshot cost, no end-of-animation hitch.
     var cs = getComputedStyle(root);
     var from = TWEEN_VARS.map(function (v) {
       var val = cs.getPropertyValue(v).trim();
@@ -132,8 +112,13 @@
       }
       if (dotField) dotField.setBase(fmtColor(lerpC(fromDot, toDot, e)));
       if (t < 1) { themeRAF = requestAnimationFrame(step); }
-      else { themeRAF = null; clearTweenVars(); if (dotField) dotField.setBase(THEME[theme]["--dot"]); }
+      else { themeRAF = null; clearTimeout(themeSafety); clearTweenVars(); if (dotField) dotField.setBase(THEME[theme]["--dot"]); }
     })(start);
+    // safety: if rAF stalls (tab blurred mid-tween), snap to the final theme
+    clearTimeout(themeSafety);
+    themeSafety = setTimeout(function () {
+      if (themeRAF) { applyThemeInstant(theme); }
+    }, dur + 700);
   }
 
   function syncThemeDots() {
@@ -355,6 +340,7 @@
     var ctx = canvas.getContext("2d");
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
     var SPACING = 68, DOTR = 2, RADIUS = 185, FALL = 0.82, IGNITE_DUR = 1150;
+    var GLOBAL_ALPHA = 0.66; // dots kept quiet overall
     var BLUE_FAR = [38, 136, 255];    // #2688ff  (accent, outer)
     var BLUE_NEAR = [122, 214, 255];  // #7ad6ff  (bright cyan-blue, nearest the cursor)
     var dots = [], w = 0, h = 0, rect = { left: 0, top: 0 };
@@ -362,6 +348,8 @@
     var pointer = { x: -9999, y: -9999, active: false };
     var rafId = null, running = false, inView = true, resimer = null;
     var igniteStart = 0, igniting = false, maxD = 1;
+    // soft clearing so dots sit quietly behind the hero text
+    var clearCX = 0, clearCY = 0, clearR0 = 1, clearR1 = 1;
 
     function measure() {
       w = hero.clientWidth; h = hero.clientHeight;
@@ -376,8 +364,25 @@
           dots.push({ hx: x, hy: y, x: x, y: y, vx: 0, vy: 0 });
         }
       }
+      // clearing centred on the actual hero text block
+      var content = hero.querySelector(".hero");
+      if (content) {
+        var cr = content.getBoundingClientRect();
+        clearCX = cr.left - rect.left + cr.width / 2;
+        clearCY = cr.top - rect.top + cr.height / 2;
+        clearR0 = Math.max(cr.width, cr.height) * 0.42;
+      } else {
+        clearCX = w * 0.4; clearCY = h * 0.42; clearR0 = 200;
+      }
+      clearR1 = clearR0 + 190;
     }
     function alphaAt(yr) { return yr < 0.52 ? 1 : yr > 0.82 ? 0 : 1 - (yr - 0.52) / 0.30; }
+    // fainter close to the text, full at the edges
+    function clearAt(d) {
+      var cx = d.hx - clearCX, cy = d.hy - clearCY;
+      var dist = Math.sqrt(cx * cx + cy * cy);
+      return dist <= clearR0 ? 0.28 : dist >= clearR1 ? 1 : 0.28 + 0.72 * (dist - clearR0) / (clearR1 - clearR0);
+    }
 
     // ignition: a soft wave sweeps out from the content origin, dots scaling up
     function igniteFactor(d, now) {
@@ -396,8 +401,8 @@
       var moving = false;
       for (var i = 0; i < dots.length; i++) {
         var d = dots[i];
-        var a = alphaAt(d.hy / h);
-        if (a <= 0) continue;
+        var a = alphaAt(d.hy / h) * GLOBAL_ALPHA * clearAt(d);
+        if (a <= 0.008) continue;
         var ig = igniteFactor(d, now);
         if (ig <= 0) { moving = true; continue; }
         // spring to home
