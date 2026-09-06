@@ -74,20 +74,44 @@
   function clearTweenVars() { TWEEN_VARS.forEach(function (v) { root.style.removeProperty(v); }); }
   function cancelThemeTween() { if (themeRAF) { cancelAnimationFrame(themeRAF); themeRAF = null; } }
 
+  function applyThemeInstant(theme) {
+    cancelThemeTween();
+    clearTweenVars();
+    root.setAttribute("data-theme", theme);
+    if (dotField) dotField.setBase(THEME[theme]["--dot"]);
+  }
+  function toggleOrigin() {
+    var t = document.getElementById("theme-toggle");
+    if (!t) return { x: window.innerWidth - 60, y: 80 };
+    var r = t.getBoundingClientRect();
+    return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+  }
+
   function setTheme(theme, animate) {
     var prev = themeName;
     themeName = theme;
     try { localStorage.setItem("theme", theme); } catch (e) {}
     syncThemeDots();
 
-    if (!animate || prefersReduced() || document.hidden || !window.requestAnimationFrame) {
-      cancelThemeTween();
-      clearTweenVars();
-      root.setAttribute("data-theme", theme);
-      if (dotField) dotField.setBase(THEME[theme]["--dot"]);
+    var canMotion = animate && !prefersReduced() && !document.hidden;
+
+    // Award-level: a radial reveal of the new theme sweeping from the toggle.
+    if (canMotion && document.startViewTransition) {
+      var o = toggleOrigin();
+      var reach = Math.hypot(Math.max(o.x, window.innerWidth - o.x), Math.max(o.y, window.innerHeight - o.y));
+      var vt = document.startViewTransition(function () { applyThemeInstant(theme); });
+      vt.ready.then(function () {
+        root.animate(
+          { clipPath: ["circle(0px at " + o.x + "px " + o.y + "px)", "circle(" + reach + "px at " + o.x + "px " + o.y + "px)"] },
+          { duration: 620, easing: "cubic-bezier(.4,0,.2,1)", pseudoElement: "::view-transition-new(root)" }
+        );
+      }).catch(function () {});
       return;
     }
 
+    if (!canMotion || !window.requestAnimationFrame) { applyThemeInstant(theme); return; }
+
+    // Fallback (no View Transitions): interpolate the colour vars via rAF.
     var cs = getComputedStyle(root);
     var from = TWEEN_VARS.map(function (v) {
       var val = cs.getPropertyValue(v).trim();
@@ -330,11 +354,14 @@
     hero.insertBefore(canvas, hero.firstChild);
     var ctx = canvas.getContext("2d");
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
-    var SPACING = 68, DOTR = 2, RADIUS = 130, FALL = 0.85;
+    var SPACING = 68, DOTR = 2, RADIUS = 185, FALL = 0.82, IGNITE_DUR = 1150;
+    var BLUE_FAR = [38, 136, 255];    // #2688ff  (accent, outer)
+    var BLUE_NEAR = [122, 214, 255];  // #7ad6ff  (bright cyan-blue, nearest the cursor)
     var dots = [], w = 0, h = 0, rect = { left: 0, top: 0 };
     var base = parseColor(THEME[themeName]["--dot"]);
     var pointer = { x: -9999, y: -9999, active: false };
-    var rafId = null, running = false, inView = true, restimer = null;
+    var rafId = null, running = false, inView = true, resimer = null;
+    var igniteStart = 0, igniting = false, maxD = 1;
 
     function measure() {
       w = hero.clientWidth; h = hero.clientHeight;
@@ -342,6 +369,7 @@
       canvas.style.width = w + "px"; canvas.style.height = h + "px";
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       rect = canvas.getBoundingClientRect();
+      maxD = Math.sqrt(w * w + h * h);
       dots = [];
       for (var y = 50; y < h; y += SPACING) {
         for (var x = 44; x < w; x += SPACING) {
@@ -351,13 +379,27 @@
     }
     function alphaAt(yr) { return yr < 0.52 ? 1 : yr > 0.82 ? 0 : 1 - (yr - 0.52) / 0.30; }
 
-    function frame() {
+    // ignition: a soft wave sweeps out from the content origin, dots scaling up
+    function igniteFactor(d, now) {
+      if (!igniting) return 1;
+      var elapsed = now - igniteStart;
+      if (elapsed >= IGNITE_DUR) { igniting = false; return 1; }
+      var cx = w * 0.34, cy = h * 0.40;
+      var dd = Math.sqrt((d.hx - cx) * (d.hx - cx) + (d.hy - cy) * (d.hy - cy)) / maxD;
+      var local = (elapsed / IGNITE_DUR) * 1.25 - dd;
+      return local <= 0 ? 0 : local >= 0.22 ? 1 : local / 0.22;
+    }
+
+    function frame(now) {
+      now = now || performance.now();
       ctx.clearRect(0, 0, w, h);
       var moving = false;
       for (var i = 0; i < dots.length; i++) {
         var d = dots[i];
         var a = alphaAt(d.hy / h);
         if (a <= 0) continue;
+        var ig = igniteFactor(d, now);
+        if (ig <= 0) { moving = true; continue; }
         // spring to home
         d.vx += (d.hx - d.x) * 0.055;
         d.vy += (d.hy - d.y) * 0.055;
@@ -368,7 +410,7 @@
           var dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < RADIUS) {
             prox = 1 - dist / RADIUS;
-            var f = Math.pow(prox, FALL) * 5.2;
+            var f = Math.pow(prox, FALL) * 5.4;
             var inv = dist || 0.0001;
             d.vx += (dx / inv) * f;
             d.vy += (dy / inv) * f;
@@ -377,13 +419,20 @@
         d.vx *= 0.86; d.vy *= 0.86;
         d.x += d.vx; d.y += d.vy;
         if (Math.abs(d.vx) + Math.abs(d.vy) > 0.05 || Math.abs(d.hx - d.x) + Math.abs(d.hy - d.y) > 0.5) moving = true;
-        var col = prox > 0.01 ? lerpC(base, [ACCENT[0], ACCENT[1], ACCENT[2], 1], Math.min(prox * 1.3, 1)) : base;
+        // contrasting-blue gradient: accent → bright cyan-blue toward the cursor
+        var col = base, rad = DOTR;
+        if (prox > 0.01) {
+          var p = Math.min(prox, 1);
+          var tint = lerpC([BLUE_FAR[0], BLUE_FAR[1], BLUE_FAR[2], 1], [BLUE_NEAR[0], BLUE_NEAR[1], BLUE_NEAR[2], 1], p);
+          col = lerpC(base, tint, Math.min(p * 1.5, 1));
+          rad = DOTR + p * 1.7;
+        }
         ctx.beginPath();
-        ctx.arc(d.x, d.y, DOTR, 0, 6.2832);
-        ctx.fillStyle = "rgba(" + Math.round(col[0]) + "," + Math.round(col[1]) + "," + Math.round(col[2]) + "," + a.toFixed(3) + ")";
+        ctx.arc(d.x, d.y, rad * (0.4 + 0.6 * ig), 0, 6.2832);
+        ctx.fillStyle = "rgba(" + Math.round(col[0]) + "," + Math.round(col[1]) + "," + Math.round(col[2]) + "," + (a * ig).toFixed(3) + ")";
         ctx.fill();
       }
-      if (running && (moving || pointer.active)) { rafId = requestAnimationFrame(frame); }
+      if (running && (moving || pointer.active || igniting)) { rafId = requestAnimationFrame(frame); }
       else { rafId = null; } // idle: stop until the pointer wakes it
     }
     function wake() { if (running && rafId === null) rafId = requestAnimationFrame(frame); }
@@ -399,7 +448,6 @@
     function onLeave() { pointer.active = false; wake(); }
     function onScroll() { rect = canvas.getBoundingClientRect(); }
     function onResize() { clearTimeout(resimer); resimer = setTimeout(function () { measure(); wake(); }, 150); }
-    var resimer = null;
 
     window.addEventListener("pointermove", onMove, { passive: true });
     window.addEventListener("pointerdown", onMove, { passive: true });
@@ -421,6 +469,7 @@
     start();
 
     this.setBase = function (color) { base = parseColor(color); wake(); };
+    this.ignite = function () { igniteStart = performance.now(); igniting = true; if (running) wake(); };
   }
 
   /* =============================================================
@@ -482,19 +531,24 @@
       if (pre && pre.parentNode) pre.parentNode.removeChild(pre);
       return;
     }
-    var replay = false;
-    try { replay = sessionStorage.getItem("introSeen") === "1"; } catch (e) {}
-    try { sessionStorage.setItem("introSeen", "1"); } catch (e) {}
-    var hold = replay ? 180 : 900;
+    // Full intro on every load so the opening always reads (research / design
+    // / code reveal, then the wipe). ~1.4s hold lets the three words land.
+    var hold = 1400;
+    var done = function () {
+      pre.removeEventListener("transitionend", done);
+      if (pre.parentNode) pre.parentNode.removeChild(pre);
+    };
     setTimeout(function () {
-      playEntrance(words);       // hides hero elements (fill) + schedules reveal
-      pre.classList.add("is-done");
-      var done = function () {
-        pre.removeEventListener("transitionend", done);
-        if (pre.parentNode) pre.parentNode.removeChild(pre);
-      };
-      pre.addEventListener("transitionend", done);
-      setTimeout(done, 900);
+      // the site "opens": hero entrance + dot-field ignition begin as the
+      // intro words lift out, then the whole panel wipes upward to reveal it.
+      playEntrance(words);
+      if (dotField && dotField.ignite) dotField.ignite();
+      pre.classList.add("is-leaving");
+      setTimeout(function () {
+        pre.classList.add("is-done");
+        pre.addEventListener("transitionend", done);
+        setTimeout(done, 1100); // fallback removal
+      }, 340);
     }, hold);
   }
 
