@@ -327,9 +327,8 @@ a { color: inherit; text-decoration: none; }
   line-height: 1.4;
   color: var(--c-aboutme);
   width: max-content;
-  transition: transform var(--dur-fast) var(--ease-out-back);
+  transition: transform var(--dur-fast) var(--ease-out);
 }
-.hero-link:hover { transform: translateY(-2px); }
 .hero-link__icon { display: inline-flex; width: 22px; height: 22px; flex-shrink: 0; }
 .hero-link__icon svg { width: 100%; height: 100%; display: block; }
 .hero-link--accent { color: var(--c-link); }
@@ -338,7 +337,10 @@ a { color: inherit; text-decoration: none; }
   text-decoration-thickness: from-font;
   text-underline-offset: 2px;
 }
-.hero-link:hover .hero-link__label { opacity: 0.85; }
+@media (hover: hover) and (pointer: fine) {
+  .hero-link:hover { transform: translateY(-2px); }
+  .hero-link:hover .hero-link__label { opacity: 0.85; }
+}
 
 /* ---- Two-dot theme switch (from Figma) ------------------- */
 /* left dot = light, right dot = dark; the active theme's dot grows a
@@ -444,7 +446,7 @@ a { color: inherit; text-decoration: none; }
 @media (min-width: 768px) { .feed__grid { grid-template-columns: repeat(2, 1fr); } }
 
 /* ---- Project card ---------------------------------------- */
-.group-wrap { will-change: transform, opacity, filter; }
+.group-wrap { will-change: transform, opacity; }
 
 .card {
   position: relative;
@@ -752,19 +754,12 @@ html.dark .toggle__icon--moon { opacity: 1; transform: rotate(0deg) scale(1); }
   100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* cards rise + de-blur — more deliberate curve, staggered from JS */
+/* cards rise in — transform + opacity only, staggered from JS */
 .js .group-wrap.rise { opacity: 0; }
-.group-wrap.rise.in { animation: card-blur-decay 0.86s var(--ease-out-sharp) both; animation-delay: var(--delay, 0s); }
-.group-wrap.rise.in .card { animation: card-rise 0.86s cubic-bezier(0.22, 0.61, 0.18, 1) both; animation-delay: var(--delay, 0s); }
+.group-wrap.rise.in { animation: card-rise 0.6s var(--ease-out) both; animation-delay: var(--delay, 0s); }
 @keyframes card-rise {
-  0%   { opacity: 0; transform: translateY(54px) scale(1.045); }
-  60%  { opacity: 1; }
-  100% { opacity: 1; transform: none; }
-}
-@keyframes card-blur-decay {
-  0%   { opacity: 0; filter: blur(9px); }
-  34%  { opacity: 1; }
-  100% { opacity: 1; filter: blur(0); }
+  from { opacity: 0; transform: translateY(34px) scale(0.985); }
+  to   { opacity: 1; transform: none; }
 }
 
 /* per-word headline reveal */

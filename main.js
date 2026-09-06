@@ -499,7 +499,7 @@
   function animateIn(node, from, dur, delay) {
     if (!node) return;
     var a = node.animate([from, { opacity: 1, transform: "none" }],
-      { duration: dur, delay: delay, easing: "cubic-bezier(.2,.75,.25,1)", fill: "both" });
+      { duration: dur, delay: delay, easing: "cubic-bezier(0.23,1,0.32,1)", fill: "both" });
     a.addEventListener("finish", function () {
       try { a.commitStyles(); a.cancel(); } catch (e) {}
     });
