@@ -73,9 +73,10 @@ const PROJECTS = [
     pinned: true,
   },
   {
-    title: "Project Two",
+    title: "Insti App Redesign",
     category: "Product Design",
-    link: "#",
+    link: "insti-app.html",
+    image: "assets/images/case-studies/insti-app/cover.jpg",
     ratio: 0.78,
   },
   {

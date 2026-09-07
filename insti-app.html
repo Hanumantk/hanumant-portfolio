@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    />
+    <title>Insti App Redesign — Hanumant Kulkarni</title>
+    <meta name="description" content="Insti App redesign for IIT Bombay — a product design case study by Hanumant Kulkarni." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600&family=Poppins:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --dur-theme: 0.2s;
+        --ease-out-back: cubic-bezier(0.2, 0, 0, 1.4);
+        --c-accent: #2688ff;
+        /* LIGHT */
+        --grad-top: #cde4ff;
+        --bg: #ffffff;
+        --heading: #00489f;
+        --body: #4e4e4e;
+        --link: #2688ff;
+        --fg: #000000; /* back button: black in light */
+        color-scheme: light;
+      }
+      :root[data-theme="dark"] {
+        --grad-top: #1b2a3c;
+        --bg: #000000;
+        --heading: #ffffff;
+        --body: #d6d6d6;
+        --link: #2688ff;
+        --fg: #ffffff; /* back button: white in dark */
+        color-scheme: dark;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+          --grad-top: #1b2a3c;
+          --bg: #000000;
+          --heading: #ffffff;
+          --body: #d6d6d6;
+          --link: #2688ff;
+          --fg: #ffffff;
+          color-scheme: dark;
+        }
+      }
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html {
+        font-size: 17px;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+        touch-action: pan-x pan-y;
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+      }
+      body {
+        min-height: 100vh;
+        /* subtle top wash into the page colour — a whisper of the site's hero */
+        background: linear-gradient(180deg, var(--grad-top) 0%, var(--bg) 26%);
+        color: var(--body);
+        font-family: "Public Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        transition: color var(--dur-theme) ease, background-color var(--dur-theme) ease;
+      }
+      a { color: inherit; text-decoration: none; }
+
+      /* same margins as the resume viewer */
+      .rz {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 22vh 1.25rem 3rem; /* same top margin as the hero (22vh) */
+      }
+      @media (min-width: 640px) { .rz { padding: 22vh 2.5rem 4rem; } }
+
+      .rz__top {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+      .rz__back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.44rem;
+        font-family: "Poppins", sans-serif;
+        font-size: 16.5px; /* 10% larger */
+        color: var(--fg); /* black in light, white in dark */
+        transition: transform 0.2s var(--ease-out-back), color var(--dur-theme) ease;
+      }
+      .rz__back:hover { transform: translateX(-3px); }
+      .rz__back svg { width: 20px; height: 20px; }
+
+      .rz__title {
+        font-family: "Poppins", sans-serif;
+        font-size: 28px;
+        font-weight: 600;
+        color: var(--heading);
+        margin-top: 1.75rem;
+        transition: color var(--dur-theme) ease;
+      }
+      .rz__sub {
+        font-family: "Poppins", sans-serif;
+        font-size: 15px;
+        color: var(--body);
+        margin-top: 0.35rem;
+        transition: color var(--dur-theme) ease;
+      }
+
+      /* the case study itself — slices stacked flush so the PAGE scrolls
+         (no inner PDF viewer / no slider). */
+      .cs-doc {
+        margin-top: 1.75rem;
+        display: block;
+      }
+      .cs-doc img {
+        display: block;
+        width: 100%;
+        height: auto;
+        /* flush against the previous slice — the seams are invisible */
+        margin: 0;
+      }
+
+      .rz__hint {
+        margin-top: 0.9rem;
+        font-size: 13px;
+        color: var(--body);
+        opacity: 0.72;
+      }
+      .rz__hint a { color: var(--link); text-decoration: underline; text-underline-offset: 2px; }
+    </style>
+  </head>
+  <body>
+    <main class="rz">
+      <div class="rz__top">
+        <a class="rz__back" href="./" aria-label="Back to home">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M19 12H5M11 18l-6-6 6-6" />
+          </svg>
+          Back
+        </a>
+      </div>
+
+      <h1 class="rz__title">Insti App Redesign</h1>
+      <p class="rz__sub">IIT Bombay’s campus platform — a product design case study by Hanumant Kulkarni</p>
+
+      <div class="cs-doc" role="img" aria-label="Insti App redesign — full case study">
+        <img src="assets/images/case-studies/insti-app/scroll/cs-01.jpg" width="2094" height="1900" alt="Insti App redesign case study" fetchpriority="high" decoding="async" />
+        <img src="assets/images/case-studies/insti-app/scroll/cs-02.jpg" width="2094" height="1900" alt="" decoding="async" />
+        <img src="assets/images/case-studies/insti-app/scroll/cs-03.jpg" width="2094" height="1900" alt="" decoding="async" />
+        <img src="assets/images/case-studies/insti-app/scroll/cs-04.jpg" width="2094" height="1900" alt="" decoding="async" />
+        <img src="assets/images/case-studies/insti-app/scroll/cs-05.jpg" width="2094" height="1900" alt="" decoding="async" />
+        <img src="assets/images/case-studies/insti-app/scroll/cs-06.jpg" width="2094" height="1900" alt="" decoding="async" />
+        <img src="assets/images/case-studies/insti-app/scroll/cs-07.jpg" width="2094" height="1900" alt="" decoding="async" />
+        <img src="assets/images/case-studies/insti-app/scroll/cs-08.jpg" width="2094" height="1900" alt="" decoding="async" />
+        <img src="assets/images/case-studies/insti-app/scroll/cs-09.jpg" width="2094" height="1900" alt="" decoding="async" />
+        <img src="assets/images/case-studies/insti-app/scroll/cs-10.jpg" width="2094" height="1900" alt="" decoding="async" />
+        <img src="assets/images/case-studies/insti-app/scroll/cs-11.jpg" width="2094" height="1900" alt="" decoding="async" />
+        <img src="assets/images/case-studies/insti-app/scroll/cs-12.jpg" width="2094" height="1900" alt="" decoding="async" />
+        <img src="assets/images/case-studies/insti-app/scroll/cs-13.jpg" width="2094" height="1900" alt="" decoding="async" />
+        <img src="assets/images/case-studies/insti-app/scroll/cs-14.jpg" width="2094" height="1900" alt="" decoding="async" />
+        <img src="assets/images/case-studies/insti-app/scroll/cs-15.jpg" width="2094" height="1900" alt="" decoding="async" />
+        <img src="assets/images/case-studies/insti-app/scroll/cs-16.jpg" width="2094" height="1900" alt="" decoding="async" />
+        <img src="assets/images/case-studies/insti-app/scroll/cs-17.jpg" width="2094" height="1900" alt="" decoding="async" />
+        <img src="assets/images/case-studies/insti-app/scroll/cs-18.jpg" width="2094" height="468" alt="" decoding="async" />
+      </div>
+    </main>
+
+    <script>
+      (function () {
+        "use strict";
+        // Inherit the theme chosen on the home page (or the OS default).
+        var root = document.documentElement;
+        var saved = null;
+        try { saved = localStorage.getItem("theme"); } catch (e) {}
+        if (saved === "light" || saved === "dark") root.setAttribute("data-theme", saved);
+
+        /* lock zoom (match the rest of the site) */
+        window.addEventListener("wheel", function (e) { if (e.ctrlKey || e.metaKey) e.preventDefault(); }, { passive: false });
+        window.addEventListener("keydown", function (e) {
+          if ((e.ctrlKey || e.metaKey) && ["+", "-", "=", "0", "_"].indexOf(e.key) !== -1) e.preventDefault();
+        });
+        ["gesturestart", "gesturechange", "gestureend"].forEach(function (t) {
+          document.addEventListener(t, function (e) { e.preventDefault(); }, { passive: false });
+        });
+      })();
+    </script>
+  </body>
+</html>
