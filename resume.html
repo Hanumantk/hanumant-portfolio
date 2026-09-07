@@ -160,6 +160,18 @@
         try { saved = localStorage.getItem("theme"); } catch (e) {}
         if (saved === "light" || saved === "dark") root.setAttribute("data-theme", saved);
 
+        // Return straight to the homepage without replaying its intro loader.
+        var backLink = document.querySelector(".rz__back");
+        if (backLink) backLink.addEventListener("click", function (e) {
+          if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+          try { sessionStorage.setItem("skip-home-intro-once", "1"); } catch (err) {}
+        });
+
+        // Also cover the browser Back button and bfcache restores.
+        window.addEventListener("pagehide", function () {
+          try { sessionStorage.setItem("skip-home-intro-once", "1"); } catch (e) {}
+        });
+
         /* lock zoom (match the rest of the site) */
         window.addEventListener("wheel", function (e) { if (e.ctrlKey || e.metaKey) e.preventDefault(); }, { passive: false });
         window.addEventListener("keydown", function (e) {
