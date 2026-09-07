@@ -68,7 +68,7 @@ const PROJECTS = [
     title: "AI Clinical Scribe",
     category: "Interaction Design",
     link: "onetheracure.html",
-    image: "public/images/case-studies/ai-clinical-documentation/cover.jpg",
+    image: "assets/images/case-studies/ai-clinical-documentation/cover.jpg",
     ratio: 1.32,
     pinned: true,
   },
