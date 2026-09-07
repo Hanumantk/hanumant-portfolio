@@ -65,9 +65,10 @@ const SITE = {
 
 const PROJECTS = [
   {
-    title: "One Theracure — AI Clinical Scribe",
+    title: "AI Clinical Scribe",
     category: "Interaction Design",
-    link: "#",
+    link: "onetheracure.html",
+    image: "public/images/case-studies/ai-clinical-documentation/cover.jpg",
     ratio: 1.32,
     pinned: true,
   },

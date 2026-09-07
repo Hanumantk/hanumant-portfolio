@@ -258,7 +258,9 @@
     group.style.position = "relative";
     var a = el("a", "card");
     a.href = p.link || "#";
-    if (p.link && p.link !== "#") { a.target = "_blank"; a.rel = "noopener"; }
+    // external links open in a new tab; internal pages (e.g. a case study)
+    // navigate in the same tab, like the Resume viewer.
+    if (p.link && /^https?:\/\//i.test(p.link)) { a.target = "_blank"; a.rel = "noopener"; }
     a.setAttribute("aria-label", p.title);
     var imgwrap = el("div", "card__imgwrap");
     if (p.image) {
