@@ -251,18 +251,32 @@
 
   /* ---- Project-page transition fallback ------------------ */
   var projectNavigationPending = false;
+  var PROJECT_RETURN_KEY = "skip-home-intro-once";
+
+  function consumeProjectReturn() {
+    try {
+      if (sessionStorage.getItem(PROJECT_RETURN_KEY) !== "1") return false;
+      sessionStorage.removeItem(PROJECT_RETURN_KEY);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
 
   function supportsCrossDocumentTransitions() {
     return !!(window.CSS && window.CSS.supports &&
       window.CSS.supports("selector(html:active-view-transition-type(project-page))"));
   }
 
-  function resetProjectNavigation() {
+  function resetProjectNavigation(event) {
     projectNavigationPending = false;
     document.body.classList.remove("is-project-opening");
     document.querySelectorAll(".group.is-opening").forEach(function (group) {
       group.classList.remove("is-opening");
     });
+    // A bfcache restore already has no preloader; consume the one-time marker
+    // so a later manual refresh still plays the regular loading intro.
+    if (event && event.persisted) consumeProjectReturn();
   }
 
   function transitionToProject(event, anchor, group) {
@@ -611,9 +625,11 @@
 
   function runIntro(words) {
     var pre = document.getElementById("preloader");
+    var returningFromProject = consumeProjectReturn();
     // Reduced-motion and older-browser fallbacks stay static and immediately
-    // visible. Every standard page load—including refresh—plays the full intro.
-    if (prefersReduced() || !pre || !document.body.animate) {
+    // visible. A return from a case study skips the loader once; fresh visits
+    // and manual refreshes continue to play the full intro.
+    if (returningFromProject || prefersReduced() || !pre || !document.body.animate) {
       if (pre && pre.parentNode) pre.parentNode.removeChild(pre);
       return;
     }
