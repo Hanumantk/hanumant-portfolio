@@ -7,13 +7,26 @@
       content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
     />
     <title>Insti App Redesign — Hanumant Kulkarni</title>
-    <meta name="description" content="Insti App redesign for IIT Bombay — a product design case study by Hanumant Kulkarni." />
+    <meta name="description" content="Insti App redesign for IIT Bombay — an interaction design case study by Hanumant Kulkarni." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600&family=Poppins:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
+    <script>
+      (function () {
+        var hasPageTransitions = typeof CSS !== "undefined" && CSS.supports &&
+          CSS.supports("selector(html:active-view-transition-type(project-page))");
+        if (hasPageTransitions) return;
+        try {
+          if (sessionStorage.getItem("project-fallback-entry") === "1") {
+            sessionStorage.removeItem("project-fallback-entry");
+            document.documentElement.classList.add("project-fallback-entry");
+          }
+        } catch (e) {}
+      })();
+    </script>
     <style>
       :root {
         --dur-theme: 0.2s;
@@ -130,6 +143,30 @@
         opacity: 0.72;
       }
       .rz__hint a { color: var(--link); text-decoration: underline; text-underline-offset: 2px; }
+
+      /* Match the project-grid transition when this case study opens. */
+      @keyframes project-page-out {
+        to { opacity: 0; transform: translateY(-10px) scale(0.995); }
+      }
+      @keyframes project-page-in {
+        from { opacity: 0; transform: translateY(14px) scale(0.99); }
+      }
+      @media (prefers-reduced-motion: no-preference) {
+        @view-transition {
+          navigation: auto;
+          types: project-page;
+        }
+        html:active-view-transition-type(project-page)::view-transition-old(root) {
+          animation: project-page-out 180ms cubic-bezier(0.4, 0, 1, 1) both;
+        }
+        html:active-view-transition-type(project-page)::view-transition-new(root) {
+          animation: project-page-in 460ms cubic-bezier(0.16, 1, 0.3, 1) both;
+          mix-blend-mode: normal;
+        }
+        html.project-fallback-entry .rz {
+          animation: project-page-in 460ms cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+      }
     </style>
   </head>
   <body>
@@ -144,7 +181,7 @@
       </div>
 
       <h1 class="rz__title">Insti App Redesign</h1>
-      <p class="rz__sub">IIT Bombay’s campus platform — a product design case study by Hanumant Kulkarni</p>
+      <p class="rz__sub">IIT Bombay’s campus platform — an interaction design case study by Hanumant Kulkarni</p>
 
       <div class="cs-doc" role="img" aria-label="Insti App redesign — full case study">
         <img src="assets/images/case-studies/insti-app/scroll/cs-01.jpg" width="2094" height="1900" alt="Insti App redesign case study" fetchpriority="high" decoding="async" />

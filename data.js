@@ -69,7 +69,7 @@ const PROJECTS = [
   },
   {
     title: "Insti App Redesign",
-    category: "Product Design",
+    category: "Interaction Design",
     link: "insti-app.html",
     image: "assets/images/case-studies/insti-app/cover.jpg",
   },

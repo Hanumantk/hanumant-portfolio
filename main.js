@@ -249,6 +249,53 @@
     return inners;
   }
 
+  /* ---- Project-page transition fallback ------------------ */
+  var projectNavigationPending = false;
+
+  function supportsCrossDocumentTransitions() {
+    return !!(window.CSS && window.CSS.supports &&
+      window.CSS.supports("selector(html:active-view-transition-type(project-page))"));
+  }
+
+  function resetProjectNavigation() {
+    projectNavigationPending = false;
+    document.body.classList.remove("is-project-opening");
+    document.querySelectorAll(".group.is-opening").forEach(function (group) {
+      group.classList.remove("is-opening");
+    });
+  }
+
+  function transitionToProject(event, anchor, group) {
+    // Keep browser-native modified clicks, downloads, external links, and the
+    // reduced-motion path untouched. Modern browsers use the CSS navigation
+    // transition; this short exit is only for browsers without that support.
+    if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    if (typeof event.button === "number" && event.button !== 0) return;
+    if (anchor.target === "_blank" || anchor.hasAttribute("download")) return;
+    if (supportsCrossDocumentTransitions() || prefersReduced()) return;
+
+    var rawHref = anchor.getAttribute("href");
+    if (!rawHref || rawHref === "#" || rawHref.charAt(0) === "#") return;
+
+    var destination;
+    try { destination = new URL(anchor.href, window.location.href); } catch (e) { return; }
+    if (destination.origin !== window.location.origin) return;
+
+    event.preventDefault();
+    if (projectNavigationPending) return;
+    projectNavigationPending = true;
+    group.classList.add("is-opening");
+    document.body.classList.add("is-project-opening");
+    try { sessionStorage.setItem("project-fallback-entry", "1"); } catch (e) {}
+
+    window.setTimeout(function () {
+      window.location.assign(destination.href);
+    }, 280);
+  }
+
+  // A page restored from the back-forward cache must not retain the exit state.
+  window.addEventListener("pageshow", resetProjectNavigation);
+
   /* ---- Build one project card ----------------------------- */
   function buildCard(p, index) {
     var wrap = el("div", "group-wrap rise reveal");
@@ -259,6 +306,11 @@
     // external links open in a new tab; internal pages (e.g. a case study)
     // navigate in the same tab, like the Resume viewer.
     if (p.link && /^https?:\/\//i.test(p.link)) { a.target = "_blank"; a.rel = "noopener"; }
+    else if (p.link) {
+      a.addEventListener("click", function (event) {
+        transitionToProject(event, a, group);
+      });
+    }
     a.setAttribute("aria-label", p.title);
     var imgwrap = el("div", "card__imgwrap");
     if (p.image) {

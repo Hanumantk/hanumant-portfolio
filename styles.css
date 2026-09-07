@@ -225,6 +225,29 @@ body.dotfield-on::after { display: none; }
 /* theme switch: radial reveal (the new theme clips in over the old, no fade) */
 ::view-transition-old(root) { animation: none; }
 ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+
+/* same-origin project navigation: the current page eases away while the
+   case study rises into place. The named type keeps this separate from the
+   theme switcher's in-page View Transition. */
+@keyframes project-page-out {
+  to { opacity: 0; transform: translateY(-10px) scale(0.995); }
+}
+@keyframes project-page-in {
+  from { opacity: 0; transform: translateY(14px) scale(0.99); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+    types: project-page;
+  }
+  html:active-view-transition-type(project-page)::view-transition-old(root) {
+    animation: project-page-out 180ms cubic-bezier(0.4, 0, 1, 1) both;
+  }
+  html:active-view-transition-type(project-page)::view-transition-new(root) {
+    animation: project-page-in 460ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    mix-blend-mode: normal;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(root),
   ::view-transition-old(root),
@@ -241,12 +264,12 @@ a { color: inherit; text-decoration: none; }
 .main {
   max-width: 1440px;
   margin: 0 auto;
-  padding: 4rem 1.5rem 0;
+  padding: 2rem 1.5rem 0;
   display: flex;
   flex-direction: column;
   gap: 5rem;
 }
-@media (min-width: 640px) { .main { padding: 5rem 100px 0; gap: 8rem; } }
+@media (min-width: 640px) { .main { padding: 3rem 100px 0; gap: 8rem; } }
 
 /* =============================================================
    HERO  —  full-width gradient band (from Figma)
@@ -414,6 +437,7 @@ a { color: inherit; text-decoration: none; }
   align-items: center;
   justify-content: space-between;
   margin-bottom: 1.5rem;
+  transition: opacity 220ms ease, transform 280ms var(--ease-out);
 }
 @media (min-width: 1024px) { .feed__head { margin-bottom: 3rem; } }
 
@@ -463,6 +487,22 @@ a { color: inherit; text-decoration: none; }
 
 /* ---- Project card ---------------------------------------- */
 .group-wrap { will-change: transform, opacity; }
+.group { transition: opacity 220ms ease, transform 280ms var(--ease-out); }
+
+/* Fallback for browsers without cross-document View Transitions. */
+body.is-project-opening .feed { pointer-events: none; }
+body.is-project-opening .feed__head {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+body.is-project-opening .group {
+  opacity: 0;
+  transform: translateY(12px) scale(0.99);
+}
+body.is-project-opening .group.is-opening {
+  opacity: 1;
+  transform: translateY(-6px) scale(0.99);
+}
 
 .card {
   position: relative;
