@@ -180,8 +180,6 @@
     return n;
   }
 
-  var ARROW =
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
   var PIN =
     '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 5.9 6.4.5-4.9 4.1 1.6 6.2L12 15.9 6.5 18.7l1.6-6.2L3.2 8.4l6.4-.5z"/></svg>';
 
@@ -279,12 +277,6 @@
       badge.setAttribute("title", "Pinned");
       a.appendChild(badge);
     }
-    var zone = el("div", "card__btnzone");
-    var btn = el("div", "card__btn");
-    btn.appendChild(el("span", "card__btn-label", p.title));
-    btn.appendChild(el("span", "card__btn-arrow", ARROW));
-    zone.appendChild(btn);
-    a.appendChild(zone);
     group.appendChild(a);
     var cap = el("div", "card__caption");
     cap.appendChild(el("span", "card__caption-title", p.title));

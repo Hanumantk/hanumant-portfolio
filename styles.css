@@ -40,7 +40,6 @@
   --c-mark: #eef1f5;
 
   --card-radius: 2rem;
-  --btn-inset: 0.375rem;
   color-scheme: light;
 }
 
@@ -470,7 +469,7 @@ a { color: inherit; text-decoration: none; }
   border-radius: 0; /* hard corners */
   overflow: hidden;
   background: var(--c-card);
-  cursor: default;
+  cursor: pointer;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
   transition: box-shadow 0.28s var(--ease-out), transform 0.28s var(--ease-out);
 }
@@ -539,80 +538,32 @@ a { color: inherit; text-decoration: none; }
 }
 .pin-badge svg { width: 14px; height: 14px; }
 
-/* hover pill button (desktop) */
-.card__btnzone {
-  position: absolute;
-  left: var(--btn-inset);
-  right: var(--btn-inset);
-  bottom: var(--btn-inset);
-  z-index: 4;
-  pointer-events: none;
-}
-.group:hover .card__btnzone { pointer-events: auto; cursor: pointer; }
-
-.card__btn {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.875rem 1.25rem;
-  border-radius: 0; /* hard corners, matching the card */
-  background: var(--c-accent);
-  color: #fff;
-  border: 1px solid var(--c-accent);
-  opacity: 0;
-  transform: translateY(12px) scale(0.98);
-  transition: transform var(--dur-base) var(--ease-out-sharp),
-              opacity 0.15s ease,
-              background var(--dur-fast) ease,
-              color var(--dur-fast) ease;
-}
-.group:hover .card__btn {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
-.card__btnzone:hover .card__btn {
-  background: var(--c-bg);
-  color: var(--c-text);
-  border-color: var(--c-border);
-  transform: translateY(-3px);
-  box-shadow: 0 6px 16px -2px oklch(66% 0.182 258 / 0.35);
-  transition: transform 0.3s var(--ease-out-sharp), background var(--dur-fast) ease, color var(--dur-fast) ease;
-}
-.card__btnzone:active .card__btn { transform: translateY(1px) scale(0.97); }
-
-.card__btn-label {
-  font-size: 0.9375rem; /* 15.94px */
-  font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.card__btn-arrow {
-  flex-shrink: 0;
-  display: flex;
-  transition: transform var(--dur-fast) var(--ease-out-sharp);
-}
-.card__btnzone:hover .card__btn-arrow { transform: translateX(3px); }
-.card__btn-arrow svg { width: 14px; height: 14px; }
-
-/* caption (mobile / touch only) */
+/* permanent project details below every card */
 .card__caption {
-  display: none;
-  margin-top: 0.625rem;
-  padding: 0 0.25rem;
-  font-size: 0.8125rem; /* 13.8px */
-  line-height: 1.4;
-  color: var(--c-muted);
+  display: flex;
+  margin-top: 0.875rem;
   align-items: baseline;
   justify-content: space-between;
   gap: 1rem;
 }
-.card__caption-tag { font-size: 0.75rem; opacity: 0.75; flex-shrink: 0; white-space: nowrap; text-align: right; }
-
-@media (hover: none), (pointer: coarse) {
-  .card__caption { display: flex; }
-  .card__btnzone { display: none; }
+.card__caption-title {
+  font-family: "Poppins", "Public Sans", ui-sans-serif, system-ui, sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: normal;
+  color: var(--c-text);
+  text-align: left;
+}
+.card__caption-tag {
+  font-family: "Public Sans", ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--c-muted);
+  opacity: 0.75;
+  flex-shrink: 0;
+  white-space: nowrap;
+  text-align: right;
 }
 
 /* =============================================================
