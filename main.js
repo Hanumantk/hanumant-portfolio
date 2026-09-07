@@ -228,50 +228,25 @@
     nav.appendChild(cols[2]);
   }
 
-  /* Split visible hero copy into individually masked words. Whitespace is
-     preserved exactly so paragraph wrapping and intentional non-breaking
-     spaces stay intact. Only the h1 uses an accessible unsplit label; the
-     other words remain in the accessibility tree as normal text. */
-  function splitHeroWords(node, useAccessibleLabel) {
+  /* Split the headline into per-word spans (decorative), while
+     keeping an unsplit accessible name on the <h1>. */
+  function splitHeadline(node) {
     if (!node) return [];
-    var text = node.textContent || "";
-    if (useAccessibleLabel) node.setAttribute("aria-label", text.trim());
+    var text = (node.textContent || "").trim();
+    node.setAttribute("aria-label", text);
     node.textContent = "";
-    var inners = [];
-    text.split(/(\s+)/).forEach(function (part) {
-      if (!part) return;
-      if (/^\s+$/.test(part)) {
-        node.appendChild(document.createTextNode(part));
-        return;
-      }
-      var mask = el("span", "hero-word");
-      if (useAccessibleLabel) mask.setAttribute("aria-hidden", "true");
-      var inner = el("span", "hero-word__i");
-      inner.textContent = part;
-      mask.appendChild(inner);
-      node.appendChild(mask);
+    var words = text.split(" "), inners = [];
+    words.forEach(function (word, i) {
+      var w = el("span", "hl-word"); // the mask (overflow-clipped)
+      w.setAttribute("aria-hidden", "true");
+      var inner = el("span", "hl-word__i"); // the part that rises
+      inner.textContent = word;
+      w.appendChild(inner);
+      node.appendChild(w);
+      if (i < words.length - 1) node.appendChild(document.createTextNode(" "));
       inners.push(inner);
     });
     return inners;
-  }
-
-  function prepareHeroWordGroups() {
-    var groups = [];
-    function add(node, step, gap, useAccessibleLabel, icon) {
-      var words = splitHeroWords(node, useAccessibleLabel);
-      if (words.length) groups.push({ words: words, step: step, gap: gap, icon: icon || null });
-    }
-
-    add(document.getElementById("hero-title"), 82, 60, true);
-    add(document.getElementById("hero-role"), 62, 85, false);
-    document.querySelectorAll("#hero-copy .hero__p").forEach(function (p) {
-      add(p, 34, 80, false);
-    });
-    document.querySelectorAll("#hero-links .hero-link__label").forEach(function (label) {
-      var link = label.parentNode;
-      add(label, 48, 30, false, link ? link.querySelector(".hero-link__icon") : null);
-    });
-    return groups;
   }
 
   /* ---- Build one project card ----------------------------- */
@@ -533,7 +508,7 @@
     });
   }
 
-  // Each hero word rises from behind its own mask (transform-only, editorial).
+  // Headline word: rises up from behind its mask (transform-only, editorial).
   function animateWordIn(inner, dur, delay) {
     if (!inner) return;
     var a = inner.animate([{ transform: "translateY(105%)" }, { transform: "none" }],
@@ -543,53 +518,46 @@
     });
   }
 
-  var HERO_ANIM_SELECTOR = "#theme-toggle, .hero-word__i, #hero-links .hero-link__icon";
-
-  function primeHeroEntrance(groups) {
-    var toggle = document.getElementById("theme-toggle");
-    if (toggle) { toggle.style.opacity = "0"; toggle.style.transform = "scale(.72)"; }
-    (groups || []).forEach(function (group) {
-      group.words.forEach(function (inner) { inner.style.transform = "translateY(105%)"; });
-      if (group.icon) { group.icon.style.opacity = "0"; group.icon.style.transform = "translateY(8px) scale(.82)"; }
-    });
-  }
-
-  function heroEntrance(groups) {
-    var t = 30;
+  var HERO_ANIM_SELECTOR = "#theme-toggle, .hl-word__i, #hero-role, #hero-copy .hero__p, #hero-links .hero-link";
+  function heroEntrance(words) {
+    var t = 0;
     animateIn(document.getElementById("theme-toggle"), { opacity: 0, transform: "scale(.72)" }, 500, t);
-    (groups || []).forEach(function (group) {
-      if (group.icon) {
-        animateIn(group.icon, { opacity: 0, transform: "translateY(8px) scale(.82)" }, 460, t);
-      }
-      group.words.forEach(function (inner) {
-        animateWordIn(inner, 680, t);
-        t += group.step;
-      });
-      t += group.gap;
+    t += 130;
+    (words || []).forEach(function (inner) {
+      animateWordIn(inner, 720, t);
+      t += 82;
+    });
+    t += 60;
+    animateIn(document.getElementById("hero-role"), { opacity: 0, transform: "translateY(12px)" }, 560, t);
+    t += 110;
+    document.querySelectorAll("#hero-copy .hero__p").forEach(function (p) {
+      animateIn(p, { opacity: 0, transform: "translateY(14px)" }, 600, t); t += 110;
+    });
+    t += 20;
+    document.querySelectorAll("#hero-links .hero-link").forEach(function (a) {
+      animateIn(a, { opacity: 0, transform: "translateY(12px)" }, 520, t); t += 78;
     });
     // safety: guarantee everything ends visible even if a frame source stalls
     setTimeout(function () {
       document.querySelectorAll(HERO_ANIM_SELECTOR).forEach(function (n) {
         n.getAnimations().forEach(function (a) { try { a.finish(); } catch (e) {} });
-        n.style.opacity = "1";
-        n.style.transform = "none";
       });
-    }, t + 1200);
+    }, t + 1400);
   }
 
   // Play the entrance, but never hide the hero in a background tab —
   // wait until the page is actually visible so it can't get stuck hidden.
-  function playEntrance(groups) {
-    if (!document.hidden) { heroEntrance(groups); return; }
+  function playEntrance(words) {
+    if (!document.hidden) { heroEntrance(words); return; }
     var onShow = function () {
       if (document.hidden) return;
       document.removeEventListener("visibilitychange", onShow);
-      heroEntrance(groups);
+      heroEntrance(words);
     };
     document.addEventListener("visibilitychange", onShow);
   }
 
-  function runIntro(wordGroups) {
+  function runIntro(words) {
     var pre = document.getElementById("preloader");
     // Reduced-motion and older-browser fallbacks stay static and immediately
     // visible. Every standard page load—including refresh—plays the full intro.
@@ -597,30 +565,30 @@
       if (pre && pre.parentNode) pre.parentNode.removeChild(pre);
       return;
     }
-    // Prime every word before the curtain moves, preventing the finished hero
-    // from flashing underneath the transparent edge of the wipe.
-    primeHeroEntrance(wordGroups);
     // The opening reads:
     // research / design / code wipe in as the loading bar fills, then the panel
     // wipes up. Slower, deliberate — ~2.05s lets the words land and the bar fill.
     var hold = 2050;
-    var heroStarted = false;
-    var finishIntro = function (event) {
-      if (event && event.target !== pre) return;
-      if (heroStarted) return;
-      heroStarted = true;
-      pre.removeEventListener("transitionend", finishIntro);
-      // Start the word-level hero entrance only once the curtain has cleared.
-      playEntrance(wordGroups);
-      if (dotField && dotField.ignite) dotField.ignite();
+    var done = function () {
+      pre.removeEventListener("transitionend", done);
       if (pre.parentNode) pre.parentNode.removeChild(pre);
     };
     setTimeout(function () {
+      // Restore the original grouped hero entrance as the intro lifts away.
+      playEntrance(words);
+      if (dotField && dotField.ignite) dotField.ignite();
+      var inner = document.querySelector(".hero-band__inner");
+      if (inner && !document.hidden && inner.animate) {
+        inner.animate(
+          [{ transform: "translateY(26px) scale(1.03)" }, { transform: "none" }],
+          { duration: 1050, delay: 300, easing: "cubic-bezier(0.23,1,0.32,1)", fill: "both" }
+        ).addEventListener("finish", function () { inner.style.transform = "none"; });
+      }
       pre.classList.add("is-leaving");
       setTimeout(function () {
         pre.classList.add("is-done");
-        pre.addEventListener("transitionend", finishIntro);
-        setTimeout(finishIntro, 1100); // fallback removal + hero reveal
+        pre.addEventListener("transitionend", done);
+        setTimeout(done, 1100); // fallback removal
       }, 340);
     }, hold);
   }
@@ -645,7 +613,7 @@
     buildFeed();
     buildFooter();
 
-    var wordGroups = prepareHeroWordGroups();
+    var words = splitHeadline(document.getElementById("hero-title"));
 
     var toggle = document.getElementById("theme-toggle");
     if (toggle) {
@@ -669,7 +637,7 @@
       try { dotField = new DotField(heroBand); document.body.classList.add("dotfield-on"); } catch (e) { dotField = null; }
     }
 
-    runIntro(wordGroups);
+    runIntro(words);
     footerMarkMotion();
   }
 

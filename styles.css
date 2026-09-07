@@ -654,12 +654,12 @@ a { color: inherit; text-decoration: none; }
   to   { opacity: 1; transform: none; }
 }
 
-/* per-word hero reveal — each word rises up from behind its own mask */
-.hero-word { display: inline-block; overflow: hidden; vertical-align: bottom; }
-.hero-word__i { display: inline-block; will-change: transform; }
+/* per-word headline reveal — each word rises up from behind its own mask */
+.hl-word { display: inline-block; overflow: hidden; vertical-align: bottom; }
+.hl-word__i { display: inline-block; will-change: transform; }
 
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
   .js .reveal, .js .group-wrap.rise { opacity: 1 !important; transform: none !important; }
-  .hero-word__i { transform: none !important; }
+  .hl-word__i { transform: none !important; }
 }
