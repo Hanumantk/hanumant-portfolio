@@ -163,6 +163,7 @@ body.dotfield-on::after { display: none; }
   animation: pl-safety 0.4s ease 4s forwards; /* self-clears if the script stalls */
   will-change: clip-path, transform;
 }
+.js.skip-home-intro #preloader { display: none; }
 .pl-words {
   display: flex;
   flex-direction: column;

@@ -10,6 +10,11 @@
       /* progressive-enhancement gate: applied before first paint so animated
          elements start hidden only when JS is available (static frame if not) */
       document.documentElement.classList.add("js");
+      try {
+        if (sessionStorage.getItem("skip-home-intro-once") === "1") {
+          document.documentElement.classList.add("skip-home-intro");
+        }
+      } catch (e) {}
     </script>
     <title>Hanumant Kulkarni, Interaction Designer</title>
     <meta

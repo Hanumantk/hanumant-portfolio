@@ -274,9 +274,12 @@
     document.querySelectorAll(".group.is-opening").forEach(function (group) {
       group.classList.remove("is-opening");
     });
-    // A bfcache restore already has no preloader; consume the one-time marker
-    // so a later manual refresh still plays the regular loading intro.
-    if (event && event.persisted) consumeProjectReturn();
+    // A bfcache restore already has no preloader. Consume the marker and move
+    // straight to the hero so a later manual refresh still plays the intro.
+    if (event && event.persisted && consumeProjectReturn()) {
+      root.classList.remove("skip-home-intro");
+      window.scrollTo(0, 0);
+    }
   }
 
   function transitionToProject(event, anchor, group) {
@@ -626,10 +629,15 @@
   function runIntro(words) {
     var pre = document.getElementById("preloader");
     var returningFromProject = consumeProjectReturn();
+    if (returningFromProject) {
+      if (pre && pre.parentNode) pre.parentNode.removeChild(pre);
+      root.classList.remove("skip-home-intro");
+      window.scrollTo(0, 0);
+      return;
+    }
     // Reduced-motion and older-browser fallbacks stay static and immediately
-    // visible. A return from a case study skips the loader once; fresh visits
-    // and manual refreshes continue to play the full intro.
-    if (returningFromProject || prefersReduced() || !pre || !document.body.animate) {
+    // visible. Fresh visits and manual refreshes play the full intro.
+    if (prefersReduced() || !pre || !document.body.animate) {
       if (pre && pre.parentNode) pre.parentNode.removeChild(pre);
       return;
     }

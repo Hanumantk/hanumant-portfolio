@@ -214,6 +214,14 @@
         try { saved = localStorage.getItem("theme"); } catch (e) {}
         if (saved === "light" || saved === "dark") root.setAttribute("data-theme", saved);
 
+        // Set the return marker before navigation begins so the homepage can
+        // suppress its loader before the first frame is captured.
+        var backLink = document.querySelector(".rz__back");
+        if (backLink) backLink.addEventListener("click", function (e) {
+          if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+          try { sessionStorage.setItem("skip-home-intro-once", "1"); } catch (err) {}
+        });
+
         // Returning to the homepage should reveal it directly, without replaying
         // the research / design / code loader. The homepage consumes this once.
         window.addEventListener("pagehide", function () {
