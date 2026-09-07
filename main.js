@@ -80,13 +80,15 @@
     root.setAttribute("data-theme", theme);
     if (dotField) dotField.setBase(THEME[theme]["--dot"]);
   }
-  function toggleOrigin() {
-    var t = document.getElementById("theme-toggle");
+  function originFrom(el) {
+    // Center the reveal on the element that was clicked (the specific dot),
+    // falling back to the toggle group, then a sane default.
+    var t = el || document.getElementById("theme-toggle");
     if (!t) return { x: window.innerWidth - 60, y: 80 };
     var r = t.getBoundingClientRect();
     return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
   }
-  function setTheme(theme, animate) {
+  function setTheme(theme, animate, originEl) {
     var prev = themeName;
     themeName = theme;
     try { localStorage.setItem("theme", theme); } catch (e) {}
@@ -94,17 +96,23 @@
 
     var canMotion = animate && !prefersReduced() && !document.hidden;
 
-    // Radial reveal of the new theme sweeping from the toggle (View Transitions).
+    // Radial reveal of the new theme sweeping from the clicked dot (View Transitions).
     if (canMotion && document.startViewTransition) {
-      var o = toggleOrigin();
-      var reach = Math.hypot(Math.max(o.x, window.innerWidth - o.x), Math.max(o.y, window.innerHeight - o.y));
+      var o = originFrom(originEl);
+      // radius = distance to the farthest viewport corner (+2% to avoid a corner seam)
+      var reach = Math.hypot(Math.max(o.x, window.innerWidth - o.x), Math.max(o.y, window.innerHeight - o.y)) * 1.02;
       var vt = document.startViewTransition(function () { applyThemeInstant(theme); });
       vt.ready.then(function () {
         root.animate(
           { clipPath: ["circle(0px at " + o.x + "px " + o.y + "px)", "circle(" + reach + "px at " + o.x + "px " + o.y + "px)"] },
-          { duration: 620, easing: "cubic-bezier(.4,0,.2,1)", pseudoElement: "::view-transition-new(root)" }
+          { duration: 480, easing: "cubic-bezier(0.23,1,0.32,1)", pseudoElement: "::view-transition-new(root)" }
         );
       }).catch(function () {});
+      // Safety: guarantee the theme sticks even if the transition is skipped/aborted.
+      vt.finished.catch(function () {}).finally(function () {
+        root.setAttribute("data-theme", theme);
+        if (dotField) dotField.setBase(THEME[theme]["--dot"]);
+      });
       return;
     }
 
@@ -136,7 +144,10 @@
   }
 
   function syncThemeDots() {
-    var active = currentTheme();
+    // Derive from the resolved target theme (themeName) — updated synchronously
+    // at the top of setTheme — NOT from the DOM attribute, which is changed
+    // later (inside the View-Transition callback) and so lags one click behind.
+    var active = themeName;
     document.querySelectorAll("#theme-toggle [data-theme-set]").forEach(function (dot) {
       var on = dot.getAttribute("data-theme-set") === active;
       if (on) dot.setAttribute("data-active", ""); else dot.removeAttribute("data-active");
@@ -226,16 +237,18 @@
     var text = (node.textContent || "").trim();
     node.setAttribute("aria-label", text);
     node.textContent = "";
-    var words = text.split(" "), spans = [];
+    var words = text.split(" "), inners = [];
     words.forEach(function (word, i) {
-      var w = el("span", "hl-word");
+      var w = el("span", "hl-word"); // the mask (overflow-clipped)
       w.setAttribute("aria-hidden", "true");
-      w.textContent = word;
+      var inner = el("span", "hl-word__i"); // the part that rises
+      inner.textContent = word;
+      w.appendChild(inner);
       node.appendChild(w);
       if (i < words.length - 1) node.appendChild(document.createTextNode(" "));
-      spans.push(w);
+      inners.push(inner);
     });
-    return spans;
+    return inners;
   }
 
   /* ---- Build one project card ----------------------------- */
@@ -505,16 +518,26 @@
     });
   }
 
-  var HERO_ANIM_SELECTOR = "#theme-toggle, .hl-word, #hero-role, #hero-copy .hero__p, #hero-links .hero-link";
+  // Headline word: rises up from behind its mask (transform-only, editorial).
+  function animateWordIn(inner, dur, delay) {
+    if (!inner) return;
+    var a = inner.animate([{ transform: "translateY(105%)" }, { transform: "none" }],
+      { duration: dur, delay: delay, easing: "cubic-bezier(0.23,1,0.32,1)", fill: "both" });
+    a.addEventListener("finish", function () {
+      try { a.commitStyles(); a.cancel(); } catch (e) {}
+    });
+  }
+
+  var HERO_ANIM_SELECTOR = "#theme-toggle, .hl-word__i, #hero-role, #hero-copy .hero__p, #hero-links .hero-link";
   function heroEntrance(words) {
     var t = 0;
     animateIn(document.getElementById("theme-toggle"), { opacity: 0, transform: "scale(.72)" }, 500, t);
-    t += 150;
-    (words || []).forEach(function (w) {
-      animateIn(w, { opacity: 0, transform: "translateY(.55em)" }, 620, t);
-      t += 66;
+    t += 130;
+    (words || []).forEach(function (inner) {
+      animateWordIn(inner, 720, t);
+      t += 82;
     });
-    t += 40;
+    t += 60;
     animateIn(document.getElementById("hero-role"), { opacity: 0, transform: "translateY(12px)" }, 560, t);
     t += 110;
     document.querySelectorAll("#hero-copy .hero__p").forEach(function (p) {
@@ -544,15 +567,28 @@
     document.addEventListener("visibilitychange", onShow);
   }
 
+  function introPlayed() {
+    try { return sessionStorage.getItem("intro-played") === "1"; } catch (e) { return false; }
+  }
+  function markIntroPlayed() {
+    try { sessionStorage.setItem("intro-played", "1"); } catch (e) {}
+  }
+
   function runIntro(words) {
     var pre = document.getElementById("preloader");
-    if (prefersReduced() || !pre || !document.body.animate) {
+    // Skip the whole intro under reduced motion, on repeat loads within the same
+    // tab session (incl. returning from resume.html), or when WAAPI is missing:
+    // drop the preloader immediately and leave the hero in its final state —
+    // no re-animation, no flash of hidden content. (The hero has no persistent
+    // hidden CSS state, so it simply shows.)
+    if (prefersReduced() || introPlayed() || !pre || !document.body.animate) {
       if (pre && pre.parentNode) pre.parentNode.removeChild(pre);
       return;
     }
-    // Full intro on every load so the opening always reads: research / design /
-    // code wipe in as the loading bar fills, then the panel wipes up. Slower,
-    // deliberate — ~2.05s lets the words land and the bar reach full.
+    markIntroPlayed();
+    // Full intro on the first load of the session so the opening reads:
+    // research / design / code wipe in as the loading bar fills, then the panel
+    // wipes up. Slower, deliberate — ~2.05s lets the words land and the bar fill.
     var hold = 2050;
     var done = function () {
       pre.removeEventListener("transitionend", done);
@@ -606,7 +642,7 @@
     var toggle = document.getElementById("theme-toggle");
     if (toggle) {
       toggle.querySelectorAll("[data-theme-set]").forEach(function (dot) {
-        dot.addEventListener("click", function () { setTheme(dot.getAttribute("data-theme-set"), true); });
+        dot.addEventListener("click", function () { setTheme(dot.getAttribute("data-theme-set"), true, dot); });
       });
     }
     syncThemeDots();
