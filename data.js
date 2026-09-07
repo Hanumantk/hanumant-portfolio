@@ -59,7 +59,6 @@ const SITE = {
    link      – URL, or "#" for now
    image     – optional path to a thumbnail (e.g. "images/one.jpg").
                Leave it out to use a generated placeholder.
-   ratio     – thumbnail height / width. 1.32 ≈ portrait, 0.7 ≈ wide.
    pinned    – true shows a small "pinned" badge (use for a featured one)
    ============================================================= */
 
@@ -69,7 +68,6 @@ const PROJECTS = [
     category: "Interaction Design",
     link: "onetheracure.html",
     image: "assets/images/case-studies/ai-clinical-documentation/cover.jpg",
-    ratio: 1.32,
     pinned: true,
   },
   {
@@ -77,12 +75,5 @@ const PROJECTS = [
     category: "Product Design",
     link: "insti-app.html",
     image: "assets/images/case-studies/insti-app/cover.jpg",
-    ratio: 0.78,
-  },
-  {
-    title: "Project Three",
-    category: "Prototyping",
-    link: "#",
-    ratio: 1.2,
   },
 ];
