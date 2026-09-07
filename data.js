@@ -65,7 +65,6 @@ const PROJECTS = [
     category: "Interaction Design",
     link: "onetheracure.html",
     image: "assets/images/case-studies/ai-clinical-documentation/cover.jpg",
-    pinned: true,
   },
   {
     title: "Insti App Redesign",

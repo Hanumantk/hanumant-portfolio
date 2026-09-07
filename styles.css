@@ -224,8 +224,15 @@ body.dotfield-on::after { display: none; }
 @media (prefers-reduced-motion: reduce) { .js #preloader { display: none !important; } }
 
 /* theme switch: radial reveal (the new theme clips in over the old, no fade) */
-::view-transition-old(root) { animation: none; }
-::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+::view-transition-group(root),
+::view-transition-image-pair(root) { animation: none; }
+::view-transition-image-pair(root) { isolation: auto; }
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  display: block;
+  mix-blend-mode: normal;
+}
 
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(root),

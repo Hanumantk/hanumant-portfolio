@@ -99,13 +99,24 @@
     // Radial reveal of the new theme sweeping from the clicked dot (View Transitions).
     if (canMotion && document.startViewTransition) {
       var o = originFrom(originEl);
-      // radius = distance to the farthest viewport corner (+2% to avoid a corner seam)
-      var reach = Math.hypot(Math.max(o.x, window.innerWidth - o.x), Math.max(o.y, window.innerHeight - o.y)) * 1.02;
+      var viewportWidth = Math.max(window.innerWidth, root.clientWidth);
+      var viewportHeight = Math.max(window.innerHeight, root.clientHeight);
+      // Extend beyond the farthest corner so the live page and final snapshot
+      // are visually identical when the transition overlay is removed.
+      var reach = Math.ceil(Math.hypot(
+        Math.max(o.x, viewportWidth - o.x),
+        Math.max(o.y, viewportHeight - o.y)
+      ) + Math.max(64, Math.max(viewportWidth, viewportHeight) * 0.05));
       var vt = document.startViewTransition(function () { applyThemeInstant(theme); });
       vt.ready.then(function () {
         root.animate(
           { clipPath: ["circle(0px at " + o.x + "px " + o.y + "px)", "circle(" + reach + "px at " + o.x + "px " + o.y + "px)"] },
-          { duration: 480, easing: "cubic-bezier(0.23,1,0.32,1)", pseudoElement: "::view-transition-new(root)" }
+          {
+            duration: 560,
+            easing: "cubic-bezier(0.4,0,0.2,1)",
+            fill: "both",
+            pseudoElement: "::view-transition-new(root)"
+          }
         );
       }).catch(function () {});
       // Safety: guarantee the theme sticks even if the transition is skipped/aborted.
