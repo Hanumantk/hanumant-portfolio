@@ -227,28 +227,6 @@ body.dotfield-on::after { display: none; }
 ::view-transition-old(root) { animation: none; }
 ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
 
-/* same-origin project navigation: the current page eases away while the
-   case study rises into place. The named type keeps this separate from the
-   theme switcher's in-page View Transition. */
-@keyframes project-page-out {
-  to { opacity: 0; transform: translateY(-10px) scale(0.995); }
-}
-@keyframes project-page-in {
-  from { opacity: 0; transform: translateY(14px) scale(0.99); }
-}
-@media (prefers-reduced-motion: no-preference) {
-  @view-transition {
-    navigation: auto;
-    types: project-page;
-  }
-  html:active-view-transition-type(project-page)::view-transition-old(root) {
-    animation: project-page-out 180ms cubic-bezier(0.4, 0, 1, 1) both;
-  }
-  html:active-view-transition-type(project-page)::view-transition-new(root) {
-    animation: project-page-in 460ms cubic-bezier(0.16, 1, 0.3, 1) both;
-    mix-blend-mode: normal;
-  }
-}
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(root),
   ::view-transition-old(root),

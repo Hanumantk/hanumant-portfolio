@@ -249,7 +249,7 @@
     return inners;
   }
 
-  /* ---- Project-page transition fallback ------------------ */
+  /* ---- Project-page transition --------------------------- */
   var projectNavigationPending = false;
   var PROJECT_RETURN_KEY = "skip-home-intro-once";
   var PROJECT_SCROLL_KEY = "project-return-scroll-y";
@@ -290,11 +290,6 @@
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(apply);
   }
 
-  function supportsCrossDocumentTransitions() {
-    return !!(window.CSS && window.CSS.supports &&
-      window.CSS.supports("selector(html:active-view-transition-type(project-page))"));
-  }
-
   function resetProjectNavigation(event) {
     projectNavigationPending = false;
     document.body.classList.remove("is-project-opening");
@@ -310,8 +305,8 @@
 
   function transitionToProject(event, anchor, group) {
     // Keep browser-native modified clicks, downloads, external links, and the
-    // reduced-motion path untouched. Modern browsers use the CSS navigation
-    // transition; this short exit is only for browsers without that support.
+    // reduced-motion path untouched. The controlled exit avoids browser-level
+    // cross-page snapshots fighting with the saved viewport on return.
     if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     if (typeof event.button === "number" && event.button !== 0) return;
     if (anchor.target === "_blank" || anchor.hasAttribute("download")) return;
@@ -324,7 +319,7 @@
     if (destination.origin !== window.location.origin) return;
 
     rememberProjectScroll();
-    if (supportsCrossDocumentTransitions() || prefersReduced()) return;
+    if (prefersReduced()) return;
 
     event.preventDefault();
     if (projectNavigationPending) return;
