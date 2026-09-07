@@ -68,7 +68,7 @@
       }
       a { color: inherit; text-decoration: none; }
 
-      /* wider than cyze's 420px column — lesser margins for a document */
+      /* same margins as the resume viewer */
       .rz {
         max-width: 960px;
         margin: 0 auto;
@@ -109,15 +109,18 @@
         transition: color var(--dur-theme) ease;
       }
 
-      .rz__doc {
+      /* the case study itself — slices stacked flush so the PAGE scrolls
+         (no inner PDF viewer / no slider). */
+      .cs-doc {
         margin-top: 1.75rem;
+        display: block;
       }
-      .rz__frame {
+      .cs-doc img {
         display: block;
         width: 100%;
-        height: min(88vh, 1240px);
-        border: 0;
-        background: transparent;
+        height: auto;
+        /* flush against the previous slice — the seams are invisible */
+        margin: 0;
       }
 
       .rz__hint {
@@ -143,11 +146,20 @@
       <h1 class="rz__title">AI Clinical Scribe</h1>
       <p class="rz__sub">One Theracure — an interaction design case study by Hanumant Kulkarni</p>
 
-      <div class="rz__doc">
-        <iframe class="rz__frame" src="assets/images/case-studies/ai-clinical-documentation/onetheracure.pdf#toolbar=0&navpanes=0&scrollbar=0&view=FitH" title="AI Clinical Scribe — case study" loading="lazy"></iframe>
+      <div class="cs-doc" role="img" aria-label="AI Clinical Scribe — full case study">
+        <img src="assets/images/case-studies/ai-clinical-documentation/scroll/cs-01.jpg" width="1800" height="3500" alt="AI Clinical Scribe case study" fetchpriority="high" />
+        <img src="assets/images/case-studies/ai-clinical-documentation/scroll/cs-02.jpg" width="1800" height="3500" alt="" loading="lazy" />
+        <img src="assets/images/case-studies/ai-clinical-documentation/scroll/cs-03.jpg" width="1800" height="3500" alt="" loading="lazy" />
+        <img src="assets/images/case-studies/ai-clinical-documentation/scroll/cs-04.jpg" width="1800" height="3500" alt="" loading="lazy" />
+        <img src="assets/images/case-studies/ai-clinical-documentation/scroll/cs-05.jpg" width="1800" height="3500" alt="" loading="lazy" />
+        <img src="assets/images/case-studies/ai-clinical-documentation/scroll/cs-06.jpg" width="1800" height="3500" alt="" loading="lazy" />
+        <img src="assets/images/case-studies/ai-clinical-documentation/scroll/cs-07.jpg" width="1800" height="3500" alt="" loading="lazy" />
+        <img src="assets/images/case-studies/ai-clinical-documentation/scroll/cs-08.jpg" width="1800" height="3500" alt="" loading="lazy" />
+        <img src="assets/images/case-studies/ai-clinical-documentation/scroll/cs-09.jpg" width="1800" height="3067" alt="" loading="lazy" />
       </div>
+
       <p class="rz__hint">
-        Can’t see the document? <a href="assets/images/case-studies/ai-clinical-documentation/onetheracure.pdf" target="_blank" rel="noopener">Open the PDF in a new tab</a>.
+        Prefer the file? <a href="assets/images/case-studies/ai-clinical-documentation/onetheracure.pdf" target="_blank" rel="noopener">Open the case study as a PDF</a>.
       </p>
     </main>
 
