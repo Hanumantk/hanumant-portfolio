@@ -252,6 +252,7 @@
   /* ---- Project-page transition fallback ------------------ */
   var projectNavigationPending = false;
   var PROJECT_RETURN_KEY = "skip-home-intro-once";
+  var PROJECT_SCROLL_KEY = "project-return-scroll-y";
 
   function consumeProjectReturn() {
     try {
@@ -261,6 +262,32 @@
     } catch (e) {
       return false;
     }
+  }
+
+  function rememberProjectScroll() {
+    try { sessionStorage.setItem(PROJECT_SCROLL_KEY, String(window.scrollY || 0)); } catch (e) {}
+  }
+
+  function restoreProjectScroll() {
+    var saved = null;
+    try {
+      saved = sessionStorage.getItem(PROJECT_SCROLL_KEY);
+      sessionStorage.removeItem(PROJECT_SCROLL_KEY);
+    } catch (e) {}
+    if (saved === null) return;
+
+    var y = Number(saved);
+    if (!isFinite(y) || y < 0) return;
+    var apply = function () { window.scrollTo(0, y); };
+    apply();
+    // Re-apply after layout and native scroll restoration have both settled.
+    if (window.requestAnimationFrame) {
+      window.requestAnimationFrame(function () {
+        apply();
+        window.requestAnimationFrame(apply);
+      });
+    }
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(apply);
   }
 
   function supportsCrossDocumentTransitions() {
@@ -274,11 +301,10 @@
     document.querySelectorAll(".group.is-opening").forEach(function (group) {
       group.classList.remove("is-opening");
     });
-    // A bfcache restore already has no preloader. Consume the marker and move
-    // straight to the hero so a later manual refresh still plays the intro.
+    // A bfcache restore already has no preloader. Consume the marker and
+    // reinstate the exact card viewport captured before the project opened.
     if (event && event.persisted && consumeProjectReturn()) {
-      root.classList.remove("skip-home-intro");
-      window.scrollTo(0, 0);
+      restoreProjectScroll();
     }
   }
 
@@ -289,7 +315,6 @@
     if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     if (typeof event.button === "number" && event.button !== 0) return;
     if (anchor.target === "_blank" || anchor.hasAttribute("download")) return;
-    if (supportsCrossDocumentTransitions() || prefersReduced()) return;
 
     var rawHref = anchor.getAttribute("href");
     if (!rawHref || rawHref === "#" || rawHref.charAt(0) === "#") return;
@@ -297,6 +322,9 @@
     var destination;
     try { destination = new URL(anchor.href, window.location.href); } catch (e) { return; }
     if (destination.origin !== window.location.origin) return;
+
+    rememberProjectScroll();
+    if (supportsCrossDocumentTransitions() || prefersReduced()) return;
 
     event.preventDefault();
     if (projectNavigationPending) return;
@@ -631,8 +659,7 @@
     var returningFromProject = consumeProjectReturn();
     if (returningFromProject) {
       if (pre && pre.parentNode) pre.parentNode.removeChild(pre);
-      root.classList.remove("skip-home-intro");
-      window.scrollTo(0, 0);
+      restoreProjectScroll();
       return;
     }
     // Reduced-motion and older-browser fallbacks stay static and immediately

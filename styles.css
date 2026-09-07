@@ -695,6 +695,14 @@ body.is-project-opening .group.is-opening {
   to   { opacity: 1; transform: none; }
 }
 
+/* A project return restores the already-viewed feed as a stable frame. */
+html.skip-home-intro .reveal,
+html.skip-home-intro .group-wrap.rise {
+  opacity: 1 !important;
+  transform: none !important;
+  animation: none !important;
+}
+
 /* per-word headline reveal — each word rises up from behind its own mask */
 .hl-word { display: inline-block; overflow: hidden; vertical-align: bottom; }
 .hl-word__i { display: inline-block; will-change: transform; }
