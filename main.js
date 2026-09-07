@@ -304,10 +304,6 @@
 
   function buildFooter() {
     var f = SITE.footer || {};
-    var place = document.getElementById("footer-place");
-    var quip = document.getElementById("footer-quip");
-    if (place) place.textContent = f.place || "";
-    if (quip) quip.textContent = f.quip || "";
     var socials = document.getElementById("footer-socials");
     (f.links || []).forEach(function (l) {
       var li = el("li");

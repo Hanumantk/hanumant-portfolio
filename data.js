@@ -36,9 +36,6 @@ const SITE = {
 
   // ---- Footer ----------------------------------------------
   footer: {
-    // Small tagline line: a place on the left, a short quip on the right.
-    place: "Made in Mumbai, India",
-    quip: "Sweating the details, one screen at a time",
     // Centered social links. Leave the array empty ([]) to hide them,
     // or edit the href/label to your real profiles.
     links: [
