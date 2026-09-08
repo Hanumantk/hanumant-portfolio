@@ -41,6 +41,7 @@
   var themeTransitionId = 0;
   var themeTransitionActive = false;
   var dotField = null;
+  var completeActiveIntro = null;
 
   function systemTheme() {
     return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
@@ -475,6 +476,10 @@
         start: "top 90%",
         once: true,
         onEnter: function (batch) {
+          if (prefersReduced()) {
+            gsap.set(batch, { autoAlpha: 1, y: 0, scale: 1 });
+            return;
+          }
           gsap.to(batch, { opacity: 1, y: 0, scale: 1, duration: 0.75, stagger: 0.1, ease: "power3.out", overwrite: true });
         }
       });
@@ -495,13 +500,87 @@
     cards.forEach(function (card) { observer.observe(card); });
   }
 
-  function heroEntrance() {
-    if (!gsap || prefersReduced()) return;
-    var timeline = gsap.timeline({ defaults: { ease: "power3.out" } });
-    timeline.from("#theme-toggle", { autoAlpha: 0, scale: 0.76, duration: 0.48 }, 0)
-      .from(".hero__identity > *", { autoAlpha: 0, y: 12, duration: 0.56, stagger: 0.08 }, 0.08)
-      .from("#hero-copy .hero__p", { autoAlpha: 0, y: 18, duration: 0.72, stagger: 0.12 }, 0.22)
-      .from("#hero-links .hero-link", { autoAlpha: 0, y: 12, duration: 0.55, stagger: 0.07 }, 0.52);
+  function clearHeroEntranceStyles() {
+    if (!gsap) return;
+    gsap.set([".hero__identity", "#hero-copy", "#hero-links"], { clearProps: "opacity,visibility,filter,willChange" });
+    gsap.set("#theme-toggle", { clearProps: "opacity,visibility,transform,willChange" });
+  }
+
+  function heroEntrance(preloader, onComplete) {
+    if (!gsap || prefersReduced()) return null;
+
+    var veil = preloader.querySelector(".pl-veil");
+    var spark = preloader.querySelector(".pl-spark");
+    var sparkCore = preloader.querySelector(".pl-spark__core");
+    var sparkRings = preloader.querySelectorAll(".pl-spark__ring");
+    var progress = preloader.querySelector(".pl-progress");
+    var words = Array.prototype.slice.call(preloader.querySelectorAll(".pl-word > span"));
+    var sparkRect = spark ? spark.getBoundingClientRect() : null;
+    var sparkX = sparkRect ? sparkRect.left + sparkRect.width / 2 : window.innerWidth / 2;
+    var sparkY = sparkRect ? sparkRect.top + sparkRect.height / 2 : window.innerHeight / 2;
+    var revealBlur = window.innerWidth <= 600 ? "blur(6px)" : "blur(9px)";
+
+    gsap.set([".hero__identity", "#hero-copy", "#hero-links"], {
+      autoAlpha: 0,
+      filter: revealBlur,
+      willChange: "opacity,filter"
+    });
+    gsap.set("#theme-toggle", {
+      autoAlpha: 0,
+      scale: 0.76,
+      willChange: "opacity,transform"
+    });
+    if (spark) gsap.set(spark, { autoAlpha: 1 });
+
+    var timeline = gsap.timeline({ defaults: { overwrite: true } });
+    words.forEach(function (word, index) {
+      var wordRect = word.getBoundingClientRect();
+      timeline.to(word, {
+        x: sparkX - (wordRect.left + wordRect.width / 2),
+        y: sparkY - (wordRect.top + wordRect.height / 2),
+        scale: 0.08,
+        autoAlpha: 0,
+        filter: "blur(5px)",
+        duration: 0.22,
+        ease: "power3.in"
+      }, index * 0.012);
+    });
+
+    if (progress) {
+      timeline.to(progress, {
+        scaleX: 0,
+        autoAlpha: 0,
+        transformOrigin: "50% 50%",
+        duration: 0.18,
+        ease: "power2.in"
+      }, 0.035);
+    }
+    if (sparkCore) {
+      timeline.fromTo(sparkCore, { scale: 0 }, { scale: 1, duration: 0.17, ease: "back.out(2.6)" }, 0.08)
+        .to(sparkCore, { scale: 2.4, autoAlpha: 0, filter: "blur(1px)", duration: 0.31, ease: "power2.out" }, 0.25);
+    }
+    if (sparkRings.length) {
+      timeline.fromTo(sparkRings, { scale: 0.25, autoAlpha: 0.72 }, {
+        scale: 4.8,
+        autoAlpha: 0,
+        duration: 0.52,
+        stagger: 0.055,
+        ease: "power2.out"
+      }, 0.14);
+    }
+
+    timeline.call(function () {
+      if (dotField && dotField.igniteAt) dotField.igniteAt(sparkX, sparkY);
+    }, null, 0.15);
+    if (veil) timeline.to(veil, { autoAlpha: 0, duration: 0.3, ease: "power2.out" }, 0.19);
+
+    timeline.to(".hero__identity", { autoAlpha: 1, filter: "blur(0px)", duration: 0.39, ease: "power3.out" }, 0.23)
+      .to("#theme-toggle", { autoAlpha: 1, scale: 1, duration: 0.35, ease: "power3.out" }, 0.3)
+      .to("#hero-copy", { autoAlpha: 1, filter: "blur(0px)", duration: 0.42, ease: "power3.out" }, 0.31)
+      .to("#hero-links", { autoAlpha: 1, filter: "blur(0px)", duration: 0.38, ease: "power3.out" }, 0.4)
+      .call(onComplete, null, 0.88);
+
+    return timeline;
   }
 
   function setPageInert(value) {
@@ -517,45 +596,94 @@
     if (returningFromDetail || prefersReduced() || document.hidden) {
       preloader.remove();
       document.body.classList.remove("intro-active");
+      document.body.classList.remove("intro-revealing");
       setPageInert(false);
       return;
     }
 
     document.body.classList.add("intro-active");
     setPageInert(true);
-    var completed = false;
+    var sequenceStarted = false;
+    var cleaned = false;
+    var introTimeline = null;
     var holdTimer = null;
     var removeTimer = null;
 
     function removePreloader() {
+      if (cleaned) return;
+      cleaned = true;
       if (preloader.parentNode) preloader.remove();
       document.body.classList.remove("intro-active");
+      document.body.classList.remove("intro-revealing");
+      clearHeroEntranceStyles();
       setPageInert(false);
       document.removeEventListener("keydown", onKeydown);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      clearTimeout(holdTimer);
       clearTimeout(removeTimer);
+      introTimeline = null;
+      if (completeActiveIntro === completeImmediately) completeActiveIntro = null;
       if (ScrollTrigger) ScrollTrigger.refresh();
     }
 
+    function completeImmediately() {
+      if (cleaned) return;
+      if (introTimeline) {
+        introTimeline.kill();
+        introTimeline = null;
+      }
+      if (dotField && dotField.settle) dotField.settle();
+      preloader.classList.add("is-done");
+      removePreloader();
+    }
+
     function finishIntro() {
-      if (completed) return;
-      completed = true;
+      if (sequenceStarted || cleaned) return;
+      sequenceStarted = true;
       clearTimeout(holdTimer);
-      heroEntrance();
-      if (dotField) dotField.ignite();
-      preloader.classList.add("is-leaving");
-      window.setTimeout(function () {
+      document.body.classList.add("intro-revealing");
+      preloader.classList.add("is-igniting");
+
+      try {
+        introTimeline = heroEntrance(preloader, function () {
+          preloader.classList.add("is-done");
+          removePreloader();
+        });
+      } catch (e) {
+        introTimeline = null;
+      }
+
+      if (introTimeline) return;
+
+      var spark = preloader.querySelector(".pl-spark");
+      var sparkRect = spark ? spark.getBoundingClientRect() : null;
+      if (dotField && dotField.igniteAt) {
+        dotField.igniteAt(
+          sparkRect ? sparkRect.left + sparkRect.width / 2 : window.innerWidth / 2,
+          sparkRect ? sparkRect.top + sparkRect.height / 2 : window.innerHeight / 2
+        );
+      }
+      preloader.classList.add("is-fallback-leaving");
+      clearTimeout(removeTimer);
+      removeTimer = window.setTimeout(function () {
         preloader.classList.add("is-done");
-        preloader.addEventListener("transitionend", removePreloader, { once: true });
-        removeTimer = window.setTimeout(removePreloader, 900);
-      }, 250);
+        removePreloader();
+      }, 680);
     }
 
     function onKeydown(event) {
-      if (event.key === "Escape") finishIntro();
+      if (event.key === "Escape") completeImmediately();
     }
 
+    function onVisibilityChange() {
+      if (document.hidden) completeImmediately();
+    }
+
+    completeActiveIntro = completeImmediately;
     document.addEventListener("keydown", onKeydown);
+    document.addEventListener("visibilitychange", onVisibilityChange);
     holdTimer = window.setTimeout(finishIntro, 1320);
+    removeTimer = window.setTimeout(completeImmediately, 2600);
   }
 
   function DotField(hero) {
@@ -579,13 +707,30 @@
     var inView = true;
     var ignitionStart = 0;
     var igniting = false;
-    var maxDistance = 1;
+    var ignitionX = 0;
+    var ignitionY = 0;
+    var ignitionRatioX = 0.5;
+    var ignitionRatioY = 0.5;
+    var ignitionMaxDistance = 1;
+    var ignitionAccent = parseColor(THEME[themeName]["--c-accent"]);
     var clearX = 0;
     var clearY = 0;
     var clearNear = 1;
     var clearFar = 1;
     var observer = null;
     var resizeObserver = null;
+    var canInteract = !!(finePointerQuery && finePointerQuery.matches);
+
+    function updateIgnitionGeometry() {
+      ignitionX = width * ignitionRatioX;
+      ignitionY = height * ignitionRatioY;
+      ignitionMaxDistance = Math.max(
+        Math.hypot(ignitionX, ignitionY),
+        Math.hypot(width - ignitionX, ignitionY),
+        Math.hypot(ignitionX, height - ignitionY),
+        Math.hypot(width - ignitionX, height - ignitionY)
+      ) || 1;
+    }
 
     function measure() {
       dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -597,7 +742,7 @@
       canvas.style.height = height + "px";
       context.setTransform(dpr, 0, 0, dpr, 0, 0);
       rect = canvas.getBoundingClientRect();
-      maxDistance = Math.sqrt(width * width + height * height);
+      updateIgnitionGeometry();
       dots = [];
       for (var y = 50; y < height; y += spacing) {
         for (var x = 44; x < width; x += spacing) dots.push({ homeX: x, homeY: y, x: x, y: y, vx: 0, vy: 0 });
@@ -632,35 +777,44 @@
       return 0.25 + 0.75 * (distance - clearNear) / (clearFar - clearNear);
     }
 
-    function ignition(dot, now) {
-      if (!igniting) return 1;
-      var elapsed = now - ignitionStart;
-      if (elapsed >= 1050) {
-        igniting = false;
-        return 1;
-      }
-      var dx = dot.homeX - width * 0.34;
-      var dy = dot.homeY - height * 0.4;
-      var distance = Math.sqrt(dx * dx + dy * dy) / maxDistance;
-      var local = elapsed / 1050 * 1.25 - distance;
-      return local <= 0 ? 0 : local >= 0.22 ? 1 : local / 0.22;
-    }
-
     function draw(now) {
       context.clearRect(0, 0, width, height);
-      var moving = false;
+      var frameTime = now || performance.now();
+      var ignitionActive = igniting;
+      var ignitionProgress = 1;
+      var ignitionFront = ignitionMaxDistance;
+      if (ignitionActive) {
+        ignitionProgress = Math.min(Math.max((frameTime - ignitionStart) / 850, 0), 1);
+        if (ignitionProgress >= 1) {
+          igniting = false;
+          ignitionActive = false;
+        } else {
+          ignitionFront = (1 - Math.pow(1 - ignitionProgress, 3)) * ignitionMaxDistance;
+        }
+      }
+
+      var moving = ignitionActive;
       dots.forEach(function (dot) {
         var alpha = verticalAlpha(dot.homeY / height) * 0.62 * contentClear(dot);
         if (alpha <= 0.008) return;
-        var igniteAmount = ignition(dot, now || performance.now());
-        if (igniteAmount <= 0) {
-          moving = true;
-          return;
+
+        var reveal = 1;
+        var ring = 0;
+        if (ignitionActive) {
+          var ignitionDx = dot.homeX - ignitionX;
+          var ignitionDy = dot.homeY - ignitionY;
+          var ignitionDistance = Math.sqrt(ignitionDx * ignitionDx + ignitionDy * ignitionDy);
+          var delta = ignitionFront - ignitionDistance;
+          var smooth = Math.min(Math.max((delta + 76) / 152, 0), 1);
+          reveal = smooth * smooth * (3 - 2 * smooth);
+          ring = Math.max(0, 1 - Math.abs(delta) / 92) * (1 - ignitionProgress * 0.18);
+          if (reveal <= 0.008 && ring <= 0.008) return;
         }
+
         dot.vx += (dot.homeX - dot.x) * 0.055;
         dot.vy += (dot.homeY - dot.y) * 0.055;
         var proximity = 0;
-        if (pointer.active) {
+        if (pointer.active && !ignitionActive) {
           var dx = dot.x - pointer.x;
           var dy = dot.y - pointer.y;
           var distance = Math.sqrt(dx * dx + dy * dy);
@@ -681,14 +835,18 @@
         if (velocityMoving || returningHome) moving = true;
 
         var color = base;
-        var dotRadius = baseRadius;
+        var dotRadius = baseRadius * (0.4 + 0.6 * reveal);
+        if (ring > 0.008) {
+          color = mixColor(color, ignitionAccent, Math.min(ring * 0.95, 1));
+          dotRadius += ring * 1.2;
+        }
         if (proximity > 0.01) {
           color = mixColor(base, [74, 168, 255, 1], Math.min(proximity * 1.5, 1));
           dotRadius += proximity * 1.6;
         }
         context.beginPath();
-        context.arc(dot.x, dot.y, dotRadius * (0.4 + 0.6 * igniteAmount), 0, Math.PI * 2);
-        context.fillStyle = "rgba(" + Math.round(color[0]) + "," + Math.round(color[1]) + "," + Math.round(color[2]) + "," + (alpha * igniteAmount).toFixed(3) + ")";
+        context.arc(dot.x, dot.y, dotRadius, 0, Math.PI * 2);
+        context.fillStyle = "rgba(" + Math.round(color[0]) + "," + Math.round(color[1]) + "," + Math.round(color[2]) + "," + Math.min(1, alpha * reveal + ring * 0.2).toFixed(3) + ")";
         context.fill();
       });
       if (running && (moving || igniting)) rafId = requestAnimationFrame(draw);
@@ -736,11 +894,13 @@
       else if (inView && !prefersReduced()) start();
     }
 
-    window.addEventListener("pointermove", onPointerMove, { passive: true });
-    window.addEventListener("pointerup", resetPointer, { passive: true });
-    window.addEventListener("pointercancel", resetPointer, { passive: true });
-    window.addEventListener("pointerleave", resetPointer, { passive: true });
-    window.addEventListener("blur", resetPointer);
+    if (canInteract) {
+      window.addEventListener("pointermove", onPointerMove, { passive: true });
+      window.addEventListener("pointerup", resetPointer, { passive: true });
+      window.addEventListener("pointercancel", resetPointer, { passive: true });
+      window.addEventListener("pointerleave", resetPointer, { passive: true });
+      window.addEventListener("blur", resetPointer);
+    }
     window.addEventListener("scroll", onScroll, { passive: true });
     document.addEventListener("visibilitychange", onVisibility);
 
@@ -768,9 +928,21 @@
       base = parseColor(color);
       wake();
     };
-    this.ignite = function () {
+    this.igniteAt = function (clientX, clientY) {
+      rect = canvas.getBoundingClientRect();
+      var localX = typeof clientX === "number" ? clientX - rect.left : width / 2;
+      var localY = typeof clientY === "number" ? clientY - rect.top : height / 2;
+      ignitionRatioX = width ? Math.min(Math.max(localX / width, 0), 1) : 0.5;
+      ignitionRatioY = height ? Math.min(Math.max(localY / height, 0), 1) : 0.5;
+      updateIgnitionGeometry();
+      ignitionAccent = parseColor(THEME[themeName]["--c-accent"]);
       ignitionStart = performance.now();
       igniting = true;
+      wake();
+    };
+    this.ignite = function () { this.igniteAt(window.innerWidth / 2, window.innerHeight / 2); };
+    this.settle = function () {
+      igniting = false;
       wake();
     };
     this.destroy = function () {
@@ -779,11 +951,13 @@
       if (observer) observer.disconnect();
       if (resizeObserver) resizeObserver.disconnect();
       else window.removeEventListener("resize", measure);
-      window.removeEventListener("pointermove", onPointerMove);
-      window.removeEventListener("pointerup", resetPointer);
-      window.removeEventListener("pointercancel", resetPointer);
-      window.removeEventListener("pointerleave", resetPointer);
-      window.removeEventListener("blur", resetPointer);
+      if (canInteract) {
+        window.removeEventListener("pointermove", onPointerMove);
+        window.removeEventListener("pointerup", resetPointer);
+        window.removeEventListener("pointercancel", resetPointer);
+        window.removeEventListener("pointerleave", resetPointer);
+        window.removeEventListener("blur", resetPointer);
+      }
       window.removeEventListener("scroll", onScroll);
       document.removeEventListener("visibilitychange", onVisibility);
       canvas.remove();
@@ -844,7 +1018,7 @@
     initCardReveals(returningFromDetail);
 
     var hero = document.querySelector(".hero-band");
-    if (hero && !prefersReduced() && finePointerQuery && finePointerQuery.matches && window.requestAnimationFrame) {
+    if (hero && !prefersReduced() && window.requestAnimationFrame) {
       try {
         dotField = new DotField(hero);
         document.body.classList.add("dotfield-on");
@@ -855,7 +1029,7 @@
 
     addMediaListener(motionQuery, function () {
       if (!prefersReduced()) return;
-      if (gsap) gsap.globalTimeline.clear();
+      if (completeActiveIntro) completeActiveIntro();
       showCardsImmediately();
       if (dotField) {
         dotField.destroy();
