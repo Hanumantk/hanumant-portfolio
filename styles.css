@@ -487,7 +487,7 @@ a {
 }
 
 .feed--projects {
-  padding-bottom: clamp(5rem, 8vw, 7rem);
+  padding-bottom: clamp(7.5rem, 12vw, 10.5rem);
 }
 
 .feed__head {
