@@ -1,58 +1,47 @@
 # Hanumant Kulkarni — Interaction Design Portfolio
 
-A minimal, editorial portfolio. Its layout, typography, spacing, hover
-interactions and animations recreate the design language of the reference
-(cyze.dev), with entirely my own content.
+A static, editorial portfolio for Hanumant Kulkarni. The visual system pairs a responsive dot-field hero with two image-led interaction-design case studies.
 
-## Run it
+## Run locally
 
-No build step, no dependencies. Either:
-
-**Option A — open directly**
-Double-click `index.html`.
-
-**Option B — local server** (recommended, matches how it's hosted)
+There is no build step. Serve the repository root with any static server, for example:
 
 ```bash
 npx serve .
 ```
 
-Then open the printed URL (e.g. http://localhost:3000).
+Opening `index.html` directly also works, although a local server more closely matches production.
 
-## Edit your content — only touch `data.js`
+## Content
 
-Everything you'll want to change lives in **`data.js`**:
+Homepage copy, links, project titles, categories, cover paths, and footer links live in `data.js`. The same essential content is also present in `index.html` as a resilient no-JavaScript first frame; keep the two in sync when changing public copy.
 
-- `SITE.name`, `SITE.role`, `SITE.intro` — the hero.
-- `PROJECTS[]` — your project list. Each project:
-  - `title` — project name
-  - `category` — short descriptor (discipline / tool)
-  - `link` — URL, or `"#"` for now
-  - `image` — *optional* path to a thumbnail, e.g. `"images/one.jpg"`.
-    Leave it out and a clean placeholder is generated automatically.
-  - `ratio` — thumbnail height ÷ width (`1.32` ≈ portrait, `0.78` ≈ wide).
-    Varying these creates the masonry rhythm.
-  - `pinned` — `true` shows a small star badge (use for a featured one).
-- `SITE.footer` — footer meta lines and social links.
+Case-study summaries and image sequences live in:
 
-To add real thumbnails: drop images into a `portfolio/images/` folder and
-set each project's `image` field to its path.
+- `onetheracure.html`
+- `insti-app.html`
+- `assets/images/case-studies/`
 
-## Files
+The resume viewer is in `resume.html`, with `resume.pdf` as its source.
 
-| File         | What it is                                             |
-|--------------|--------------------------------------------------------|
-| `index.html` | Page shell (semantic markup, font + style links)       |
-| `styles.css` | Design system — tokens, layout, cards, animations      |
-| `main.js`    | Renders projects from `data.js`, wires up interactions |
-| `data.js`    | **Your content.** The only file you normally edit.     |
+## Structure
 
-## Design notes
+| File | Purpose |
+| --- | --- |
+| `index.html` | Semantic homepage shell, metadata, and static fallback content |
+| `data.js` | Homepage content source |
+| `styles.css` | Homepage tokens, layout, themes, and responsive states |
+| `main.js` | Homepage rendering, theme switch, dot field, transitions, and motion |
+| `detail.css` | Shared case-study and resume presentation |
+| `detail.js` | Shared case-study progress, Lenis integration, return state, and resume loading state |
+| `robots.txt` / `sitemap.xml` | Search-engine discovery |
 
-- **Dark by default** with a light theme toggle (remembered per browser).
-- **Desktop:** two-column masonry feed; hovering a card raises it and slides
-  up a pill button with the project title + arrow.
-- **Mobile / touch:** single column; the title + category show as a caption
-  under each card instead of the hover button.
-- Colors use OKLCH; motion uses shared easing/duration tokens.
-- Respects `prefers-reduced-motion`.
+## Interaction system
+
+- Self-hosted GSAP 3.13 and ScrollTrigger provide the primary entrance and scroll choreography.
+- Self-hosted Lenis 1.3.26 is the only smooth-scroll engine and runs only on the long case-study pages. Its frame loop is synchronized with GSAP.
+- The theme choice persists in `localStorage`; the saved theme is applied before paint.
+- Project and resume return links skip the branded loader and restore the saved homepage viewport.
+- Reduced-motion, keyboard focus, browser zoom, safe-area insets, and no-JavaScript states are supported.
+
+The existing GitHub-connected production workflow deploys updates pushed to the canonical repository.

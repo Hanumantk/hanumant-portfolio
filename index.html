@@ -2,35 +2,48 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <script>
-      /* progressive-enhancement gate: applied before first paint so animated
-         elements start hidden only when JS is available (static frame if not) */
-      document.documentElement.classList.add("js");
-      try {
-        if (sessionStorage.getItem("skip-home-intro-once") === "1") {
-          document.documentElement.classList.add("skip-home-intro");
-        }
-      } catch (e) {}
+      (function () {
+        var root = document.documentElement;
+        root.classList.add("js");
+        try {
+          var savedTheme = localStorage.getItem("theme");
+          if (savedTheme === "light" || savedTheme === "dark") root.setAttribute("data-theme", savedTheme);
+          if (sessionStorage.getItem("skip-home-intro-once") === "1") root.classList.add("skip-home-intro");
+        } catch (e) {}
+      })();
     </script>
     <title>Hanumant Kulkarni, Interaction Designer</title>
-    <meta
-      name="description"
-      content="Hanumant Kulkarni — Interaction Designer studying Interaction Design at IIT Bombay. Selected projects."
-    />
+    <meta name="description" content="Hanumant Kulkarni is an interaction designer at IIT Bombay, creating clear and engaging digital experiences. Explore selected work." />
+    <meta name="theme-color" content="#cde4ff" />
+    <meta property="og:title" content="Hanumant Kulkarni, Interaction Designer" />
+    <meta property="og:description" content="Selected interaction design work by Hanumant Kulkarni." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://hanumantk.in/" />
+    <link rel="canonical" href="https://hanumantk.in/" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600&family=Poppins:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Hanumant Kulkarni",
+        "url": "https://hanumantk.in/",
+        "jobTitle": "Interaction Designer",
+        "affiliation": { "@type": "CollegeOrUniversity", "name": "Indian Institute of Technology Bombay" },
+        "sameAs": [
+          "https://www.linkedin.com/in/hanumant-kulkarni-b0b96631a/",
+          "https://www.behance.net/hanumankulkarn1"
+        ]
+      }
+    </script>
   </head>
   <body>
-    <!-- PRELOADER (JS-only; skipped under reduced motion) -->
+    <a class="skip-link" href="#projects">Skip to selected work</a>
+
     <div id="preloader" aria-hidden="true">
       <div class="pl-words">
         <span class="pl-word"><span>research</span></span>
@@ -40,49 +53,93 @@
       </div>
     </div>
 
-    <!-- HERO (full viewport; background lives on the page, not here) -->
-    <header class="hero-band">
+    <header class="hero-band" id="top">
       <div class="hero-band__inner">
-        <section class="hero">
+        <section class="hero" aria-labelledby="hero-title">
           <div class="hero__top">
-            <div>
-              <h1 class="hero__title" id="hero-title">Hi, I'm Hanumant</h1>
-              <div class="hero__role" id="hero-role">Interaction Designer</div>
+            <div class="hero__identity">
+              <h1 class="hero__title" id="hero-title">Hi, I’m Hanumant</h1>
+              <p class="hero__role" id="hero-role">Interaction Designer</p>
             </div>
-            <div class="theme-dots" id="theme-toggle" role="group" aria-label="Theme">
-              <button class="theme-dots__dot theme-dots__dot--light" data-theme-set="light" type="button" aria-label="Light theme"></button>
-              <button class="theme-dots__dot theme-dots__dot--dark" data-theme-set="dark" type="button" aria-label="Dark theme"></button>
+            <div class="theme-dots" id="theme-toggle" role="group" aria-label="Choose color theme">
+              <button class="theme-dots__dot theme-dots__dot--light" data-theme-set="light" type="button" aria-label="Use light theme"></button>
+              <button class="theme-dots__dot theme-dots__dot--dark" data-theme-set="dark" type="button" aria-label="Use dark theme"></button>
             </div>
           </div>
-          <div id="hero-copy"></div>
-          <nav class="hero-links" id="hero-links" aria-label="Profile links"></nav>
+
+          <div id="hero-copy">
+            <p class="hero__p hero__p--first">I turn complex workflows into clear interaction systems across healthcare and campus products.</p>
+            <p class="hero__p">I currently study Interaction Design at IIT&nbsp;Bombay.</p>
+          </div>
+
+          <nav class="hero-links" id="hero-links" aria-label="Profile links">
+            <div class="hero-links__col">
+              <a class="hero-link hero-link--accent" href="https://www.linkedin.com/in/hanumant-kulkarni-b0b96631a/" target="_blank" rel="noopener" aria-label="LinkedIn (opens in a new tab)">
+                <span class="hero-link__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5A2.5 2.5 0 1 1 0 3.5a2.5 2.5 0 0 1 4.98 0zM.25 8.25h4.45V23H.25zM8.1 8.25h4.27v2.02h.06c.6-1.13 2.05-2.32 4.22-2.32 4.51 0 5.34 2.97 5.34 6.83V23h-4.45v-6.53c0-1.56-.03-3.56-2.17-3.56-2.17 0-2.5 1.7-2.5 3.45V23H8.1z" /></svg></span>
+                <span class="hero-link__label">LinkedIn</span>
+              </a>
+              <a class="hero-link hero-link--accent" href="https://www.behance.net/hanumankulkarn1" target="_blank" rel="noopener" aria-label="Behance (opens in a new tab)">
+                <span class="hero-link__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.3 6.9c.66 0 1.26.06 1.8.18.54.1 1 .3 1.38.55.38.26.68.6.89 1.04.2.43.3.97.3 1.6 0 .69-.15 1.26-.47 1.72-.31.45-.78.83-1.4 1.12.85.24 1.48.67 1.9 1.28.42.6.62 1.34.62 2.19 0 .69-.13 1.29-.4 1.79-.27.5-.63.92-1.09 1.24-.45.32-.98.56-1.57.71-.59.15-1.2.23-1.82.23H2V6.9zm-.36 4.85c.54 0 .98-.13 1.33-.38.34-.26.51-.67.51-1.25 0-.32-.06-.58-.17-.79-.12-.2-.28-.36-.48-.47-.2-.11-.43-.19-.69-.23-.26-.05-.53-.07-.81-.07H4.9v3.19zm.16 5.09c.3 0 .58-.03.85-.09.27-.05.5-.15.7-.28.2-.14.37-.32.49-.55.12-.23.18-.53.18-.89 0-.7-.2-1.2-.59-1.5-.39-.3-.92-.45-1.57-.45H4.9v3.76zM16.5 16.9c.37.36.9.54 1.6.54.5 0 .93-.13 1.29-.38.36-.25.58-.52.66-.8h2.36c-.38 1.17-.96 2.01-1.74 2.51-.78.5-1.73.75-2.83.75-.77 0-1.46-.12-2.08-.37-.62-.24-1.14-.59-1.57-1.04-.43-.45-.76-.98-.99-1.61-.23-.62-.35-1.31-.35-2.06 0-.73.12-1.4.36-2.02.24-.62.58-1.16 1.02-1.61.44-.45.96-.81 1.57-1.06.61-.26 1.28-.39 2.02-.39.82 0 1.54.16 2.15.48.61.32 1.11.74 1.5 1.28.39.53.67 1.14.84 1.83.17.68.23 1.4.18 2.15h-6.99c0 .77.19 1.34.55 1.71zM19.4 12c-.29-.32-.76-.5-1.38-.5-.4 0-.74.07-1 .21-.27.14-.48.31-.64.51-.16.2-.27.42-.33.64-.06.22-.1.42-.11.6h4.32c-.06-.68-.29-1.16-.58-1.46zM14.7 7.34h5.4V8.7h-5.4z" /></svg></span>
+                <span class="hero-link__label">Behance</span>
+              </a>
+            </div>
+            <div class="hero-links__col">
+              <a class="hero-link hero-link--accent" href="resume.html">
+                <span class="hero-link__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" /><path d="M14 3v6h6M8 13h8M8 17h5" /></svg></span>
+                <span class="hero-link__label">Resume</span>
+              </a>
+            </div>
+          </nav>
         </section>
+
+        <a class="hero__work-cue" href="#projects">
+          <span>Selected work</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v16M6 14l6 6 6-6" /></svg>
+        </a>
       </div>
     </header>
 
-    <main class="main">
-      <!-- INDEX / PROJECT FEED -->
-      <section class="feed">
+    <main class="main" id="main-content">
+      <section class="feed" id="projects" aria-labelledby="feed-label">
         <div class="feed__head">
           <h2 class="feed__label" id="feed-label">Index</h2>
-          <div class="feed__tabs">
-            <button class="feed__tab is-active" id="feed-tab" type="button">Projects</button>
-            <span class="feed__underline" id="feed-underline"></span>
+          <div class="feed__tabs" aria-label="Project category">
+            <span class="feed__tab is-active" id="feed-tab">Projects</span>
+            <span class="feed__underline" aria-hidden="true"></span>
           </div>
         </div>
-        <div class="feed__grid" id="feed-grid"></div>
+
+        <div class="feed__grid" id="feed-grid">
+          <article class="group-wrap rise">
+            <a class="group" href="onetheracure.html" aria-describedby="project-one-caption">
+              <span class="card"><span class="card__imgwrap"><img class="card__img" src="assets/images/case-studies/ai-clinical-documentation/cover.jpg" width="1600" height="1600" alt="AI Clinical Scribe project cover" loading="lazy" decoding="async" /></span></span>
+              <span class="card__caption" id="project-one-caption"><span class="card__caption-index">01</span><span class="card__caption-title">AI Clinical Scribe</span><span class="card__caption-tag">Interaction Design</span></span>
+            </a>
+          </article>
+          <article class="group-wrap rise">
+            <a class="group" href="insti-app.html" aria-describedby="project-two-caption">
+              <span class="card"><span class="card__imgwrap"><img class="card__img" src="assets/images/case-studies/insti-app/cover.jpg" width="1600" height="1600" alt="Insti App Redesign project cover" loading="lazy" decoding="async" /></span></span>
+              <span class="card__caption" id="project-two-caption"><span class="card__caption-index">02</span><span class="card__caption-title">Insti App Redesign</span><span class="card__caption-tag">Interaction Design</span></span>
+            </a>
+          </article>
+        </div>
       </section>
     </main>
 
-    <!-- FOOTER -->
     <footer class="footer">
       <div class="footer__frame">
-        <ul class="footer__socials" id="footer-socials"></ul>
-        <p class="footer__mark" id="footer-mark" aria-hidden="true"></p>
+        <ul class="footer__socials" id="footer-socials">
+          <li><a href="https://www.linkedin.com/in/hanumant-kulkarni-b0b96631a/" target="_blank" rel="noopener" aria-label="LinkedIn (opens in a new tab)">LinkedIn</a></li>
+          <li><a href="https://www.behance.net/hanumankulkarn1" target="_blank" rel="noopener" aria-label="Behance (opens in a new tab)">Behance</a></li>
+          <li><button class="footer__top" type="button">Back to top</button></li>
+        </ul>
+        <p class="footer__mark" id="footer-mark" aria-hidden="true">Hanumant</p>
       </div>
     </footer>
 
-    <script src="data.js"></script>
-    <script src="main.js"></script>
+    <script defer src="vendor/gsap.min.js"></script>
+    <script defer src="vendor/ScrollTrigger.min.js"></script>
+    <script defer src="data.js"></script>
+    <script defer src="main.js"></script>
   </body>
 </html>

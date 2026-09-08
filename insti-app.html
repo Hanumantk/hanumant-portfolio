@@ -2,238 +2,117 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
-    />
-    <title>Insti App Redesign — Hanumant Kulkarni</title>
-    <meta name="description" content="Insti App redesign for IIT Bombay — an interaction design case study by Hanumant Kulkarni." />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600&family=Poppins:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="preconnect" href="https://unpkg.com" crossorigin />
-    <link rel="stylesheet" href="https://unpkg.com/lenis@1.3.26/dist/lenis.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <script>
       (function () {
         try {
+          var root = document.documentElement;
+          root.classList.add("js");
+          var savedTheme = localStorage.getItem("theme");
+          if (savedTheme === "light" || savedTheme === "dark") root.setAttribute("data-theme", savedTheme);
           if (sessionStorage.getItem("project-fallback-entry") === "1") {
             sessionStorage.removeItem("project-fallback-entry");
-            document.documentElement.classList.add("project-fallback-entry");
+            root.classList.add("project-fallback-entry");
           }
         } catch (e) {}
       })();
     </script>
-    <style>
-      :root {
-        --dur-theme: 0.2s;
-        --ease-out-back: cubic-bezier(0.2, 0, 0, 1.4);
-        --c-accent: #2688ff;
-        /* LIGHT */
-        --grad-top: #cde4ff;
-        --bg: #ffffff;
-        --heading: #00489f;
-        --body: #4e4e4e;
-        --link: #2688ff;
-        --fg: #000000; /* back button: black in light */
-        color-scheme: light;
+    <title>Insti App Redesign — Hanumant Kulkarni</title>
+    <meta name="description" content="A role-aware redesign of IIT Bombay’s InstiApp event workflow, designed by Hanumant Kulkarni." />
+    <meta name="theme-color" content="#cde4ff" />
+    <meta property="og:title" content="Insti App Redesign — Hanumant Kulkarni" />
+    <meta property="og:description" content="A role-aware workflow for creating, reviewing, and publishing campus events." />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://hanumantk.in/insti-app.html" />
+    <meta property="og:image" content="https://hanumantk.in/assets/images/case-studies/insti-app/cover.jpg" />
+    <link rel="canonical" href="https://hanumantk.in/insti-app.html" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="vendor/lenis.css" />
+    <link rel="stylesheet" href="detail.css" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "CreativeWork",
+        "name": "Insti App Redesign",
+        "url": "https://hanumantk.in/insti-app.html",
+        "creator": { "@type": "Person", "name": "Hanumant Kulkarni", "url": "https://hanumantk.in/" },
+        "about": "Interaction design concept for IIT Bombay campus event management"
       }
-      :root[data-theme="dark"] {
-        --grad-top: #1b2a3c;
-        --bg: #000000;
-        --heading: #ffffff;
-        --body: #d6d6d6;
-        --link: #2688ff;
-        --fg: #ffffff; /* back button: white in dark */
-        color-scheme: dark;
-      }
-      @media (prefers-color-scheme: dark) {
-        :root:not([data-theme="light"]) {
-          --grad-top: #1b2a3c;
-          --bg: #000000;
-          --heading: #ffffff;
-          --body: #d6d6d6;
-          --link: #2688ff;
-          --fg: #ffffff;
-          color-scheme: dark;
-        }
-      }
-
-      * { margin: 0; padding: 0; box-sizing: border-box; }
-      html {
-        font-size: 17px;
-        -webkit-font-smoothing: antialiased;
-        text-rendering: optimizeLegibility;
-        touch-action: pan-x pan-y;
-        -webkit-text-size-adjust: 100%;
-        text-size-adjust: 100%;
-      }
-      body {
-        min-height: 100vh;
-        /* subtle top wash into the page colour — a whisper of the site's hero */
-        background: linear-gradient(180deg, var(--grad-top) 0%, var(--bg) 26%);
-        color: var(--body);
-        font-family: "Public Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-        transition: color var(--dur-theme) ease, background-color var(--dur-theme) ease;
-      }
-      a { color: inherit; text-decoration: none; }
-
-      /* same margins as the resume viewer */
-      .rz {
-        max-width: 960px;
-        margin: 0 auto;
-        padding: 22vh 1.25rem 3rem; /* same top margin as the hero (22vh) */
-      }
-      @media (min-width: 640px) { .rz { padding: 22vh 2.5rem 4rem; } }
-
-      .rz__top {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-      }
-      .rz__back {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.44rem;
-        font-family: "Poppins", sans-serif;
-        font-size: 16.5px; /* 10% larger */
-        color: var(--fg); /* black in light, white in dark */
-        transition: transform 0.2s var(--ease-out-back), color var(--dur-theme) ease;
-      }
-      .rz__back:hover { transform: translateX(-3px); }
-      .rz__back svg { width: 20px; height: 20px; }
-
-      .rz__title {
-        font-family: "Poppins", sans-serif;
-        font-size: 28px;
-        font-weight: 600;
-        color: var(--heading);
-        margin-top: 1.75rem;
-        transition: color var(--dur-theme) ease;
-      }
-      .rz__sub {
-        font-family: "Poppins", sans-serif;
-        font-size: 15px;
-        color: var(--body);
-        margin-top: 0.35rem;
-        transition: color var(--dur-theme) ease;
-      }
-
-      /* the case study itself — slices stacked flush so the PAGE scrolls
-         (no inner PDF viewer / no slider). */
-      .cs-doc {
-        margin-top: 1.75rem;
-        display: block;
-      }
-      .cs-doc img {
-        display: block;
-        width: 100%;
-        height: auto;
-        /* flush against the previous slice — the seams are invisible */
-        margin: 0;
-      }
-
-      .rz__hint {
-        margin-top: 0.9rem;
-        font-size: 13px;
-        color: var(--body);
-        opacity: 0.72;
-      }
-      .rz__hint a { color: var(--link); text-decoration: underline; text-underline-offset: 2px; }
-
-      /* Match the project-grid transition when this case study opens. */
-      @keyframes project-page-in {
-        from { opacity: 0.72; transform: translateY(10px) scale(0.995); }
-      }
-      @media (prefers-reduced-motion: no-preference) {
-        html.project-fallback-entry .rz {
-          animation: project-page-in 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
-        }
-      }
-    </style>
+    </script>
   </head>
-  <body>
+  <body data-smooth-scroll="true">
+    <a class="skip-link" href="#case-study">Skip to visual case study</a>
+    <div class="reading-progress" aria-hidden="true"><div class="reading-progress__bar"></div></div>
+
     <main class="rz">
       <div class="rz__top">
-        <a class="rz__back" href="./" aria-label="Back to home">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M19 12H5M11 18l-6-6 6-6" />
-          </svg>
+        <a class="rz__back" href="./" aria-label="Back to selected work" data-home-link>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 18l-6-6 6-6" /></svg>
           Back
         </a>
       </div>
 
-      <h1 class="rz__title">Insti App Redesign</h1>
-      <p class="rz__sub">IIT Bombay’s campus platform — an interaction design case study by Hanumant Kulkarni</p>
+      <header class="rz__masthead">
+        <p class="rz__eyebrow">Case study · 02</p>
+        <h1 class="rz__title">Insti App Redesign</h1>
+        <p class="rz__sub">A role-aware redesign of IIT Bombay’s campus platform, expanding a student discovery feed into a workflow for creating, reviewing, revising, and publishing events.</p>
+        <ul class="rz__meta" aria-label="Project details">
+          <li><span>Context</span>IIT Bombay · InstiApp</li>
+          <li><span>Scope</span>Solo design project · 4 weeks</li>
+          <li><span>Status</span>Concept redesign · not launched</li>
+          <li><span>Focus</span>Event-management workflow</li>
+        </ul>
 
-      <div class="cs-doc" role="img" aria-label="Insti App redesign — full case study">
-        <img src="assets/images/case-studies/insti-app/scroll/cs-01.jpg" width="2094" height="1900" alt="Insti App redesign case study" fetchpriority="high" decoding="async" />
-        <img src="assets/images/case-studies/insti-app/scroll/cs-02.jpg" width="2094" height="1900" alt="" decoding="async" />
-        <img src="assets/images/case-studies/insti-app/scroll/cs-03.jpg" width="2094" height="1900" alt="" decoding="async" />
-        <img src="assets/images/case-studies/insti-app/scroll/cs-04.jpg" width="2094" height="1900" alt="" decoding="async" />
-        <img src="assets/images/case-studies/insti-app/scroll/cs-05.jpg" width="2094" height="1900" alt="" decoding="async" />
-        <img src="assets/images/case-studies/insti-app/scroll/cs-06.jpg" width="2094" height="1900" alt="" decoding="async" />
-        <img src="assets/images/case-studies/insti-app/scroll/cs-07.jpg" width="2094" height="1900" alt="" decoding="async" />
-        <img src="assets/images/case-studies/insti-app/scroll/cs-08.jpg" width="2094" height="1900" alt="" decoding="async" />
-        <img src="assets/images/case-studies/insti-app/scroll/cs-09.jpg" width="2094" height="1900" alt="" decoding="async" />
-        <img src="assets/images/case-studies/insti-app/scroll/cs-10.jpg" width="2094" height="1900" alt="" decoding="async" />
-        <img src="assets/images/case-studies/insti-app/scroll/cs-11.jpg" width="2094" height="1900" alt="" decoding="async" />
-        <img src="assets/images/case-studies/insti-app/scroll/cs-12.jpg" width="2094" height="1900" alt="" decoding="async" />
-        <img src="assets/images/case-studies/insti-app/scroll/cs-13.jpg" width="2094" height="1900" alt="" decoding="async" />
-        <img src="assets/images/case-studies/insti-app/scroll/cs-14.jpg" width="2094" height="1900" alt="" decoding="async" />
-        <img src="assets/images/case-studies/insti-app/scroll/cs-15.jpg" width="2094" height="1900" alt="" decoding="async" />
-        <img src="assets/images/case-studies/insti-app/scroll/cs-16.jpg" width="2094" height="1900" alt="" decoding="async" />
-        <img src="assets/images/case-studies/insti-app/scroll/cs-17.jpg" width="2094" height="1900" alt="" decoding="async" />
-        <img src="assets/images/case-studies/insti-app/scroll/cs-18.jpg" width="2094" height="468" alt="" decoding="async" />
-      </div>
+        <details class="case-outline">
+          <summary>Read the project overview</summary>
+          <div class="case-outline__grid">
+            <section><h2>Who was hurting</h2><p>A rejected event returned only a status with no reason or next step. The gap affected creators and approvers as well as the students discovering events.</p></section>
+            <section><h2>Roles and research</h2><p>The workflow maps three roles—Student, Creator, and Approver—using informal conversations with campus communication operators rather than a formal study.</p></section>
+            <section><h2>From feed to workflow</h2><p>The brief moved from cleaning up a feed to supporting create, submit, review, decide, revise, and publish as one connected lifecycle.</p></section>
+            <section><h2>Organized around intent</h2><p>The information architecture follows what each role arrives to do instead of forcing students, creators, and approvers through one undifferentiated stream.</p></section>
+            <section><h2>Core decisions</h2><p>Creation mirrors the published event, lifecycle status follows the event everywhere, and approvers receive a dedicated queue with inline decisions.</p></section>
+            <section><h2>What remains</h2><p>The concept was not launched and has no post-launch metrics. Open work includes clearer rejection reasons, IA tree testing, time-to-decision, and reject-to-resubmit measurement.</p></section>
+          </div>
+        </details>
+      </header>
+
+      <figure class="cs-doc" id="case-study">
+        <figcaption class="sr-only">The complete visual walkthrough of the Insti App Redesign project. A text overview is available above.</figcaption>
+        <img src="assets/images/case-studies/insti-app/scroll/cs-01.jpg" width="2094" height="1900" alt="Insti App Redesign visual case study cover" fetchpriority="high" decoding="async" />
+        <img src="assets/images/case-studies/insti-app/scroll/cs-02.jpg" width="2094" height="1900" alt="" loading="lazy" fetchpriority="low" decoding="async" />
+        <img src="assets/images/case-studies/insti-app/scroll/cs-03.jpg" width="2094" height="1900" alt="" loading="lazy" fetchpriority="low" decoding="async" />
+        <img src="assets/images/case-studies/insti-app/scroll/cs-04.jpg" width="2094" height="1900" alt="" loading="lazy" fetchpriority="low" decoding="async" />
+        <img src="assets/images/case-studies/insti-app/scroll/cs-05.jpg" width="2094" height="1900" alt="" loading="lazy" fetchpriority="low" decoding="async" />
+        <img src="assets/images/case-studies/insti-app/scroll/cs-06.jpg" width="2094" height="1900" alt="" loading="lazy" fetchpriority="low" decoding="async" />
+        <img src="assets/images/case-studies/insti-app/scroll/cs-07.jpg" width="2094" height="1900" alt="" loading="lazy" fetchpriority="low" decoding="async" />
+        <img src="assets/images/case-studies/insti-app/scroll/cs-08.jpg" width="2094" height="1900" alt="" loading="lazy" fetchpriority="low" decoding="async" />
+        <img src="assets/images/case-studies/insti-app/scroll/cs-09.jpg" width="2094" height="1900" alt="" loading="lazy" fetchpriority="low" decoding="async" />
+        <img src="assets/images/case-studies/insti-app/scroll/cs-10.jpg" width="2094" height="1900" alt="" loading="lazy" fetchpriority="low" decoding="async" />
+        <img src="assets/images/case-studies/insti-app/scroll/cs-11.jpg" width="2094" height="1900" alt="" loading="lazy" fetchpriority="low" decoding="async" />
+        <img src="assets/images/case-studies/insti-app/scroll/cs-12.jpg" width="2094" height="1900" alt="" loading="lazy" fetchpriority="low" decoding="async" />
+        <img src="assets/images/case-studies/insti-app/scroll/cs-13.jpg" width="2094" height="1900" alt="" loading="lazy" fetchpriority="low" decoding="async" />
+        <img src="assets/images/case-studies/insti-app/scroll/cs-14.jpg" width="2094" height="1900" alt="" loading="lazy" fetchpriority="low" decoding="async" />
+        <img src="assets/images/case-studies/insti-app/scroll/cs-15.jpg" width="2094" height="1900" alt="" loading="lazy" fetchpriority="low" decoding="async" />
+        <img src="assets/images/case-studies/insti-app/scroll/cs-16.jpg" width="2094" height="1900" alt="" loading="lazy" fetchpriority="low" decoding="async" />
+        <img src="assets/images/case-studies/insti-app/scroll/cs-17.jpg" width="2094" height="1900" alt="" loading="lazy" fetchpriority="low" decoding="async" />
+        <img src="assets/images/case-studies/insti-app/scroll/cs-18.jpg" width="2094" height="468" alt="" loading="lazy" fetchpriority="low" decoding="async" />
+      </figure>
+
+      <footer class="case-end">
+        <p class="case-end__label">Continue exploring</p>
+        <div class="case-end__links">
+          <a class="case-end__link" href="onetheracure.html"><span><small>Next project</small>AI Clinical Scribe</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
+          <a class="case-end__link" href="./#projects" data-home-link><span><small>Index</small>All projects</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg></a>
+          <button class="case-end__link" type="button" data-back-to-top><span><small>Page</small>Back to top</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6" /></svg></button>
+        </div>
+      </footer>
     </main>
 
-    <script src="https://unpkg.com/lenis@1.3.26/dist/lenis.min.js"></script>
-    <script>
-      (function () {
-        "use strict";
-        // Inherit the theme chosen on the home page (or the OS default).
-        var root = document.documentElement;
-        var saved = null;
-        try { saved = localStorage.getItem("theme"); } catch (e) {}
-        if (saved === "light" || saved === "dark") root.setAttribute("data-theme", saved);
-
-        // Smooth the long case-study document while preserving native scroll
-        // semantics and the user's reduced-motion preference.
-        if (typeof window.Lenis === "function") {
-          window.projectLenis = new window.Lenis({
-            autoRaf: true,
-            anchors: true,
-            stopInertiaOnNavigate: true,
-            respectReducedMotion: true
-          });
-        }
-
-        // Set the return marker before navigation begins so the homepage can
-        // suppress its loader before the first frame is captured.
-        var backLink = document.querySelector(".rz__back");
-        if (backLink) backLink.addEventListener("click", function (e) {
-          if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
-          try { sessionStorage.setItem("skip-home-intro-once", "1"); } catch (err) {}
-        });
-
-        // Returning to the homepage should reveal it directly, without replaying
-        // the research / design / code loader. The homepage consumes this once.
-        window.addEventListener("pagehide", function () {
-          try { sessionStorage.setItem("skip-home-intro-once", "1"); } catch (e) {}
-        });
-
-        /* lock zoom (match the rest of the site) */
-        window.addEventListener("wheel", function (e) { if (e.ctrlKey || e.metaKey) e.preventDefault(); }, { passive: false });
-        window.addEventListener("keydown", function (e) {
-          if ((e.ctrlKey || e.metaKey) && ["+", "-", "=", "0", "_"].indexOf(e.key) !== -1) e.preventDefault();
-        });
-        ["gesturestart", "gesturechange", "gestureend"].forEach(function (t) {
-          document.addEventListener(t, function (e) { e.preventDefault(); }, { passive: false });
-        });
-      })();
-    </script>
+    <script defer src="vendor/gsap.min.js"></script>
+    <script defer src="vendor/ScrollTrigger.min.js"></script>
+    <script defer src="vendor/lenis.min.js"></script>
+    <script defer src="detail.js"></script>
   </body>
 </html>

@@ -2,185 +2,52 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <script>
+      try {
+        document.documentElement.classList.add("js");
+        var savedTheme = localStorage.getItem("theme");
+        if (savedTheme === "light" || savedTheme === "dark") document.documentElement.setAttribute("data-theme", savedTheme);
+      } catch (e) {}
+    </script>
     <title>Resume — Hanumant Kulkarni</title>
-    <meta name="description" content="Resume — Hanumant Kulkarni, Interaction Designer, IIT Bombay." />
+    <meta name="description" content="Resume of Hanumant Kulkarni, Interaction Designer at IIT Bombay." />
+    <meta name="robots" content="noindex, follow" />
+    <meta name="theme-color" content="#cde4ff" />
+    <meta property="og:title" content="Resume — Hanumant Kulkarni" />
+    <meta property="og:description" content="Hanumant Kulkarni — Interaction Designer, IIT Bombay." />
+    <meta property="og:type" content="profile" />
+    <meta property="og:url" content="https://hanumantk.in/resume.html" />
+    <link rel="canonical" href="https://hanumantk.in/resume.html" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600&family=Poppins:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
-    <style>
-      :root {
-        --dur-theme: 0.2s;
-        --ease-out-back: cubic-bezier(0.2, 0, 0, 1.4);
-        --c-accent: #2688ff;
-        /* LIGHT */
-        --grad-top: #cde4ff;
-        --bg: #ffffff;
-        --heading: #00489f;
-        --body: #4e4e4e;
-        --link: #2688ff;
-        --fg: #000000; /* back button: black in light */
-        color-scheme: light;
-      }
-      :root[data-theme="dark"] {
-        --grad-top: #1b2a3c;
-        --bg: #000000;
-        --heading: #ffffff;
-        --body: #d6d6d6;
-        --link: #2688ff;
-        --fg: #ffffff; /* back button: white in dark */
-        color-scheme: dark;
-      }
-      @media (prefers-color-scheme: dark) {
-        :root:not([data-theme="light"]) {
-          --grad-top: #1b2a3c;
-          --bg: #000000;
-          --heading: #ffffff;
-          --body: #d6d6d6;
-          --link: #2688ff;
-          --fg: #ffffff;
-          color-scheme: dark;
-        }
-      }
-
-      * { margin: 0; padding: 0; box-sizing: border-box; }
-      html {
-        font-size: 17px;
-        -webkit-font-smoothing: antialiased;
-        text-rendering: optimizeLegibility;
-        touch-action: pan-x pan-y;
-        -webkit-text-size-adjust: 100%;
-        text-size-adjust: 100%;
-      }
-      body {
-        min-height: 100vh;
-        /* subtle top wash into the page colour — a whisper of the site's hero */
-        background: linear-gradient(180deg, var(--grad-top) 0%, var(--bg) 26%);
-        color: var(--body);
-        font-family: "Public Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-        transition: color var(--dur-theme) ease, background-color var(--dur-theme) ease;
-      }
-      a { color: inherit; text-decoration: none; }
-
-      /* wider than cyze's 420px column — lesser margins for a document */
-      .rz {
-        max-width: 960px;
-        margin: 0 auto;
-        padding: 22vh 1.25rem 3rem; /* same top margin as the hero (22vh) */
-      }
-      @media (min-width: 640px) { .rz { padding: 22vh 2.5rem 4rem; } }
-
-      .rz__top {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-      }
-      .rz__back {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.44rem;
-        font-family: "Poppins", sans-serif;
-        font-size: 16.5px; /* 10% larger */
-        color: var(--fg); /* black in light, white in dark */
-        transition: transform 0.2s var(--ease-out-back), color var(--dur-theme) ease;
-      }
-      .rz__back:hover { transform: translateX(-3px); }
-      .rz__back svg { width: 20px; height: 20px; }
-
-      .rz__title {
-        font-family: "Poppins", sans-serif;
-        font-size: 28px;
-        font-weight: 600;
-        color: var(--heading);
-        margin-top: 1.75rem;
-        transition: color var(--dur-theme) ease;
-      }
-      .rz__sub {
-        font-family: "Poppins", sans-serif;
-        font-size: 15px;
-        color: var(--body);
-        margin-top: 0.35rem;
-        transition: color var(--dur-theme) ease;
-      }
-
-      .rz__doc {
-        margin-top: 1.75rem;
-      }
-      .rz__frame {
-        display: block;
-        width: 100%;
-        height: min(88vh, 1240px);
-        border: 0;
-        background: transparent;
-      }
-
-      .rz__hint {
-        margin-top: 0.9rem;
-        font-size: 13px;
-        color: var(--body);
-        opacity: 0.72;
-      }
-      .rz__hint a { color: var(--link); text-decoration: underline; text-underline-offset: 2px; }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="detail.css" />
   </head>
   <body>
+    <a class="skip-link" href="#resume-document">Skip to resume document</a>
+
     <main class="rz">
       <div class="rz__top">
-        <a class="rz__back" href="./" aria-label="Back to home">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M19 12H5M11 18l-6-6 6-6" />
-          </svg>
+        <a class="rz__back" href="./" aria-label="Back to home" data-home-link>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 18l-6-6 6-6" /></svg>
           Back
         </a>
       </div>
 
-      <h1 class="rz__title">Resume</h1>
-      <p class="rz__sub">Hanumant Kulkarni — Interaction Designer, IIT Bombay</p>
+      <header class="rz__masthead">
+        <p class="rz__eyebrow">Profile</p>
+        <h1 class="rz__title">Resume</h1>
+        <p class="rz__sub">Hanumant Kulkarni — Interaction Designer, IIT Bombay.</p>
+      </header>
 
-      <div class="rz__doc">
-        <iframe class="rz__frame" src="resume.pdf#toolbar=0&navpanes=0&scrollbar=0&view=FitH" title="Resume — Hanumant Kulkarni" loading="lazy"></iframe>
-      </div>
-      <p class="rz__hint">
-        Can’t see the document? <a href="resume.pdf" target="_blank" rel="noopener">Open the PDF in a new tab</a>.
-      </p>
+      <section class="rz__doc" id="resume-document" aria-label="Resume document viewer">
+        <p class="rz__loading" role="status">Loading resume…</p>
+        <iframe class="rz__frame" src="resume.pdf#toolbar=0&navpanes=0&scrollbar=0&view=FitH" title="Resume — Hanumant Kulkarni"></iframe>
+      </section>
+      <p class="rz__hint">Can’t see the document? <a href="resume.pdf" target="_blank" rel="noopener" aria-label="Open the resume PDF in a new tab">Open the PDF in a new tab</a>.</p>
     </main>
 
-    <script>
-      (function () {
-        "use strict";
-        // Inherit the theme chosen on the home page (or the OS default).
-        var root = document.documentElement;
-        var saved = null;
-        try { saved = localStorage.getItem("theme"); } catch (e) {}
-        if (saved === "light" || saved === "dark") root.setAttribute("data-theme", saved);
-
-        // Return straight to the homepage without replaying its intro loader.
-        var backLink = document.querySelector(".rz__back");
-        if (backLink) backLink.addEventListener("click", function (e) {
-          if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
-          try { sessionStorage.setItem("skip-home-intro-once", "1"); } catch (err) {}
-        });
-
-        // Also cover the browser Back button and bfcache restores.
-        window.addEventListener("pagehide", function () {
-          try { sessionStorage.setItem("skip-home-intro-once", "1"); } catch (e) {}
-        });
-
-        /* lock zoom (match the rest of the site) */
-        window.addEventListener("wheel", function (e) { if (e.ctrlKey || e.metaKey) e.preventDefault(); }, { passive: false });
-        window.addEventListener("keydown", function (e) {
-          if ((e.ctrlKey || e.metaKey) && ["+", "-", "=", "0", "_"].indexOf(e.key) !== -1) e.preventDefault();
-        });
-        ["gesturestart", "gesturechange", "gestureend"].forEach(function (t) {
-          document.addEventListener(t, function (e) { e.preventDefault(); }, { passive: false });
-        });
-      })();
-    </script>
+    <script defer src="detail.js"></script>
   </body>
 </html>
