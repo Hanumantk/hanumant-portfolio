@@ -6,11 +6,61 @@
     <script>
       (function () {
         var root = document.documentElement;
+        var navigationEntry = null;
+        var isReload = false;
+
         root.classList.add("js");
+
+        if (window.performance) {
+          if (typeof window.performance.getEntriesByType === "function") {
+            navigationEntry = window.performance.getEntriesByType("navigation")[0] || null;
+          }
+          isReload = navigationEntry
+            ? navigationEntry.type === "reload"
+            : !!(window.performance.navigation && window.performance.navigation.type === 1);
+        }
+
+        if (isReload) {
+          var previousScrollBehavior = root.style.scrollBehavior;
+          root.style.scrollBehavior = "auto";
+
+          try {
+            sessionStorage.removeItem("skip-home-intro-once");
+            sessionStorage.removeItem("project-return-scroll-y");
+            sessionStorage.removeItem("project-return-focus");
+          } catch (e) {}
+
+          try {
+            if ("scrollRestoration" in window.history) window.history.scrollRestoration = "manual";
+          } catch (e) {}
+
+          function resetHomeScroll() {
+            window.scrollTo(0, 0);
+          }
+
+          resetHomeScroll();
+          document.addEventListener("DOMContentLoaded", resetHomeScroll, { once: true });
+          window.addEventListener("load", resetHomeScroll, { once: true });
+          window.addEventListener("pageshow", function (event) {
+            if (event.persisted) return;
+            resetHomeScroll();
+            window.requestAnimationFrame(function () {
+              resetHomeScroll();
+              window.requestAnimationFrame(function () {
+                resetHomeScroll();
+                root.style.scrollBehavior = previousScrollBehavior;
+                try {
+                  if ("scrollRestoration" in window.history) window.history.scrollRestoration = "auto";
+                } catch (e) {}
+              });
+            });
+          }, { once: true });
+        }
+
         try {
           var savedTheme = localStorage.getItem("theme");
           if (savedTheme === "light" || savedTheme === "dark") root.setAttribute("data-theme", savedTheme);
-          if (sessionStorage.getItem("skip-home-intro-once") === "1") root.classList.add("skip-home-intro");
+          if (!isReload && sessionStorage.getItem("skip-home-intro-once") === "1") root.classList.add("skip-home-intro");
         } catch (e) {}
       })();
     </script>
