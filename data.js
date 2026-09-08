@@ -25,6 +25,7 @@ const SITE = {
     { label: "LinkedIn", href: "https://www.linkedin.com/in/hanumant-kulkarni-b0b96631a/", icon: "linkedin", col: 1, accent: true },
     { label: "Behance",  href: "https://www.behance.net/hanumankulkarn1",                   icon: "behance",  col: 1, accent: true },
     { label: "Resume",   href: "resume.html",                                                icon: "resume",   col: 2, accent: true },
+    { label: "About me", href: "#",                                                          icon: "arrow",    col: 2, accent: false },
   ],
 
   // ---- Index label -----------------------------------------
