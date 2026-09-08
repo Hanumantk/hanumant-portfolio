@@ -13,7 +13,7 @@ const SITE = {
 
   // Each string is one paragraph in the intro.
   intro: [
-    "I turn complex workflows into clear interaction systems across healthcare and campus products.",
+    "I design interactions that make digital experiences feel intuitive, clear, and engaging.",
     "I currently study Interaction Design at IIT&nbsp;Bombay.",
   ],
 

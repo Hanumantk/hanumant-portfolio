@@ -333,7 +333,7 @@
   function buildHero() {
     var title = document.getElementById("hero-title");
     var role = document.getElementById("hero-role");
-    if (title) title.textContent = "Hi, I’m " + SITE.name;
+    if (title) title.textContent = "Hi, I'm " + SITE.name;
     if (role) role.textContent = SITE.role;
 
     var copy = document.getElementById("hero-copy");
@@ -501,8 +501,7 @@
     timeline.from("#theme-toggle", { autoAlpha: 0, scale: 0.76, duration: 0.48 }, 0)
       .from(".hero__identity > *", { autoAlpha: 0, y: 12, duration: 0.56, stagger: 0.08 }, 0.08)
       .from("#hero-copy .hero__p", { autoAlpha: 0, y: 18, duration: 0.72, stagger: 0.12 }, 0.22)
-      .from("#hero-links .hero-link", { autoAlpha: 0, y: 12, duration: 0.55, stagger: 0.07 }, 0.52)
-      .from(".hero__work-cue", { autoAlpha: 0, y: -8, duration: 0.48 }, 0.74);
+      .from("#hero-links .hero-link", { autoAlpha: 0, y: 12, duration: 0.55, stagger: 0.07 }, 0.52);
   }
 
   function setPageInert(value) {
