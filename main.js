@@ -115,11 +115,30 @@
     });
   }
 
-  function themeOrigin(element) {
+  function themeRevealGeometry(element) {
     var target = element || document.getElementById("theme-toggle");
-    if (!target) return { x: window.innerWidth - 56, y: 64 };
-    var rect = target.getBoundingClientRect();
-    return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+    var width = Math.max(root.clientWidth || window.innerWidth || 0, 1);
+    var height = Math.max(root.clientHeight || window.innerHeight || 0, 1);
+    var x = width - 56;
+    var y = 64;
+
+    if (target) {
+      var rect = target.getBoundingClientRect();
+      x = rect.left + rect.width / 2;
+      y = rect.top + rect.height / 2;
+    }
+
+    x = Math.max(0, Math.min(width, x));
+    y = Math.max(0, Math.min(height, y));
+
+    var normalizedDiagonal = Math.hypot(width, height) / Math.SQRT2;
+    var farthestCorner = Math.hypot(Math.max(x, width - x), Math.max(y, height - y));
+
+    // Relative geometry stays aligned when browser zoom scales the transition snapshot.
+    return {
+      position: (x / width * 100).toFixed(4) + "% " + (y / height * 100).toFixed(4) + "%",
+      radius: Math.ceil(farthestCorner / normalizedDiagonal * 102) + "%"
+    };
   }
 
   function tweenThemeFallback(previous, next) {
@@ -169,17 +188,14 @@
     var canAnimate = animate && !prefersReduced() && !document.hidden;
     if (canAnimate && typeof document.startViewTransition === "function") {
       themeTransitionActive = true;
-      var origin = themeOrigin(originElement);
-      var width = Math.max(window.innerWidth, root.clientWidth);
-      var height = Math.max(window.innerHeight, root.clientHeight);
-      var radius = Math.ceil(Math.hypot(width, height) + 128);
+      var reveal = themeRevealGeometry(originElement);
       var transition = document.startViewTransition(function () { applyThemeInstant(next); });
       var radialAnimation = null;
 
       transition.ready.then(function () {
         if (transitionId !== themeTransitionId) return;
         radialAnimation = root.animate(
-          { clipPath: ["circle(0px at " + origin.x + "px " + origin.y + "px)", "circle(" + radius + "px at " + origin.x + "px " + origin.y + "px)"] },
+          { clipPath: ["circle(0% at " + reveal.position + ")", "circle(" + reveal.radius + " at " + reveal.position + ")"] },
           { duration: 680, easing: "cubic-bezier(0.16,1,0.3,1)", fill: "both", pseudoElement: "::view-transition-new(root)" }
         );
       }).catch(function () {
