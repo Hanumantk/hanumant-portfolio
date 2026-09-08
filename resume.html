@@ -22,9 +22,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="vendor/lenis.css" />
     <link rel="stylesheet" href="detail.css" />
   </head>
-  <body>
+  <body data-smooth-scroll="true">
     <a class="skip-link" href="#resume-document">Skip to resume document</a>
 
     <main class="rz">
@@ -43,11 +44,12 @@
 
       <section class="rz__doc" id="resume-document" aria-label="Resume document viewer">
         <p class="rz__loading" role="status">Loading resume…</p>
-        <iframe class="rz__frame" src="resume.pdf#toolbar=0&navpanes=0&scrollbar=0&view=FitH" title="Resume — Hanumant Kulkarni"></iframe>
+        <img class="rz__resume-page" src="assets/images/resume/resume-page.png" width="1600" height="2265" alt="Visual preview of Hanumant Kulkarni's resume. A selectable PDF version is linked below." fetchpriority="high" decoding="async" />
       </section>
-      <p class="rz__hint">Can’t see the document? <a href="resume.pdf" target="_blank" rel="noopener" aria-label="Open the resume PDF in a new tab">Open the PDF in a new tab</a>.</p>
+      <p class="rz__hint">Prefer a selectable document? <a href="resume.pdf" target="_blank" rel="noopener" aria-label="Open the resume PDF in a new tab">Open the PDF in a new tab</a>.</p>
     </main>
 
+    <script defer src="vendor/lenis.min.js"></script>
     <script defer src="detail.js"></script>
   </body>
 </html>

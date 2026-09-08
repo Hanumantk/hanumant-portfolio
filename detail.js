@@ -52,6 +52,16 @@
     if (lenis) lenis.stop();
   }
 
+  function destroyLenis() {
+    if (!lenis) return;
+    if (gsap && lenisTicker) gsap.ticker.remove(lenisTicker);
+    lenisTicker = null;
+    try { lenis.destroy(); } catch (e) {}
+    lenis = null;
+    window.projectLenis = null;
+    root.classList.remove("lenis", "lenis-smooth", "lenis-scrolling", "lenis-stopped");
+  }
+
   function resumeLenis() {
     if (!lenis || prefersReduced()) return;
     lenis.start();
@@ -136,12 +146,13 @@
     });
   }
 
-  function initResumeFrame() {
-    var frame = document.querySelector(".rz__frame");
+  function initResumeMedia() {
+    var frame = document.querySelector(".rz__resume-page");
     var wrapper = document.querySelector(".rz__doc");
     if (!frame || !wrapper) return;
     var loaded = function () { wrapper.classList.add("is-loaded"); };
-    frame.addEventListener("load", loaded, { once: true });
+    if (frame.complete) loaded();
+    else frame.addEventListener("load", loaded, { once: true });
     window.setTimeout(function () {
       if (!wrapper.classList.contains("is-loaded")) wrapper.classList.add("is-slow");
     }, 2500);
@@ -158,12 +169,12 @@
     initEntryMotion();
     initReturnLinks();
     initTopButtons();
-    initResumeFrame();
+    initResumeMedia();
 
     if (motionQuery) {
       var onMotionChange = function () {
         if (prefersReduced()) {
-          stopLenis();
+          destroyLenis();
           if (gsap) gsap.globalTimeline.clear();
           updateProgress();
         } else {

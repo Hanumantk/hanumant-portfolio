@@ -22,7 +22,7 @@ Case-study summaries and image sequences live in:
 - `insti-app.html`
 - `assets/images/case-studies/`
 
-The resume viewer is in `resume.html`, with `resume.pdf` as its source.
+The resume viewer is in `resume.html`. It uses `assets/images/resume/resume-page.png` for the smooth in-page preview and keeps `resume.pdf` as the selectable source document.
 
 ## Structure
 
@@ -39,7 +39,7 @@ The resume viewer is in `resume.html`, with `resume.pdf` as its source.
 ## Interaction system
 
 - Self-hosted GSAP 3.13 and ScrollTrigger provide the primary entrance and scroll choreography.
-- Self-hosted Lenis 1.3.26 is the only smooth-scroll engine and runs only on the long case-study pages. Its frame loop is synchronized with GSAP.
+- Self-hosted Lenis 1.3.26 is the only smooth-scroll engine and runs on the long case-study and resume pages. Its case-study frame loop is synchronized with GSAP.
 - The theme choice persists in `localStorage`; the saved theme is applied before paint.
 - Project and resume return links skip the branded loader and restore the saved homepage viewport.
 - Reduced-motion, keyboard focus, browser zoom, safe-area insets, and no-JavaScript states are supported.
