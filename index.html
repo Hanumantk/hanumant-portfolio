@@ -10,6 +10,11 @@
       /* progressive-enhancement gate: applied before first paint so animated
          elements start hidden only when JS is available (static frame if not) */
       document.documentElement.classList.add("js");
+      try {
+        if (sessionStorage.getItem("skip-home-intro-once") === "1") {
+          document.documentElement.classList.add("skip-home-intro");
+        }
+      } catch (e) {}
     </script>
     <title>Hanumant Kulkarni, Interaction Designer</title>
     <meta
@@ -72,10 +77,6 @@
     <!-- FOOTER -->
     <footer class="footer">
       <div class="footer__frame">
-        <div class="footer__tagline">
-          <span class="footer__place" id="footer-place"></span>
-          <span class="footer__quip" id="footer-quip"></span>
-        </div>
         <ul class="footer__socials" id="footer-socials"></ul>
         <p class="footer__mark" id="footer-mark" aria-hidden="true"></p>
       </div>
@@ -83,7 +84,6 @@
 
     <script src="data.js"></script>
     <script src="main.js"></script>
-
     <!-- Vercel Web Analytics (cookieless; activates once enabled in the Vercel dashboard) -->
     <script>
       window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
