@@ -1,6 +1,6 @@
 # Hanumant Kulkarni — Interaction Design Portfolio
 
-A static, editorial portfolio for Hanumant Kulkarni. The visual system pairs a responsive dot-field hero with two image-led interaction-design case studies.
+A static, editorial portfolio for Hanumant Kulkarni. The visual system pairs a responsive dot-field hero with two interaction-design case studies and one graphic-design work experience.
 
 ## Run locally
 
@@ -20,6 +20,7 @@ Case-study summaries and image sequences live in:
 
 - `onetheracure.html`
 - `insti-app.html`
+- `recoup-health.html`
 - `assets/images/case-studies/`
 
 The resume viewer is in `resume.html`. It uses `assets/images/resume/resume-page.png` for the smooth in-page preview and keeps `resume.pdf` as the selectable source document.

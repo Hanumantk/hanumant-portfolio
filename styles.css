@@ -486,12 +486,20 @@ a {
   scroll-margin-top: 1.5rem;
 }
 
+.feed--projects {
+  padding-bottom: clamp(5rem, 8vw, 7rem);
+}
+
 .feed__head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: clamp(1.75rem, 4vw, 3rem);
   transition: opacity 220ms ease, transform 280ms var(--ease-out);
+}
+
+.feed__head--single {
+  justify-content: flex-end;
 }
 
 .feed__label,

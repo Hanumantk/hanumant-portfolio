@@ -369,12 +369,13 @@
     if (columns[2].children.length) nav.appendChild(columns[2]);
   }
 
-  function buildCard(project, index) {
+  function buildCard(project, index, collection) {
+    var scope = collection || "project";
     var wrapper = createElement("article", "group-wrap rise");
     var anchor = createElement("a", "group");
     anchor.href = project.link || "#";
-    anchor.setAttribute("data-return-id", "project-" + index);
-    var captionId = "project-caption-" + index;
+    anchor.setAttribute("data-return-id", scope + "-" + index);
+    var captionId = scope + "-caption-" + index;
     anchor.setAttribute("aria-describedby", captionId);
 
     if (/^https?:\/\//i.test(project.link || "")) {
@@ -392,7 +393,7 @@
     if (project.image) {
       var image = createElement("img", "card__img");
       image.src = project.image;
-      image.alt = project.title + " project cover";
+      image.alt = project.imageAlt || project.title + " project cover";
       image.width = 1600;
       image.height = 1600;
       image.loading = "lazy";
@@ -421,9 +422,19 @@
   function buildFeed() {
     document.getElementById("feed-label").textContent = SITE.indexLabel;
     document.getElementById("feed-tab").textContent = SITE.category;
-    var grid = document.getElementById("feed-grid");
-    grid.textContent = "";
-    PROJECTS.forEach(function (project, index) { grid.appendChild(buildCard(project, index)); });
+    var workCategory = SITE.workCategory || "Work Experience";
+    document.getElementById("work-feed-label").textContent = workCategory;
+    document.getElementById("work-feed-tab").textContent = workCategory;
+
+    function renderCards(gridId, items, scope) {
+      var grid = document.getElementById(gridId);
+      if (!grid) return;
+      grid.textContent = "";
+      (items || []).forEach(function (item, index) { grid.appendChild(buildCard(item, index, scope)); });
+    }
+
+    renderCards("feed-grid", PROJECTS, "project");
+    renderCards("work-feed-grid", typeof WORK_EXPERIENCE === "undefined" ? [] : WORK_EXPERIENCE, "experience");
   }
 
   function buildFooter() {

@@ -28,10 +28,10 @@ const SITE = {
     { label: "About me", href: "#",                                                          icon: "arrow",    col: 2, accent: false },
   ],
 
-  // ---- Index label -----------------------------------------
-  // Only one category, exactly as requested.
+  // ---- Homepage section labels -----------------------------
   indexLabel: "Index",
   category: "Projects",
+  workCategory: "Work Experience",
 
   // ---- Footer ----------------------------------------------
   footer: {
@@ -72,5 +72,23 @@ const PROJECTS = [
     category: "Interaction Design",
     link: "insti-app.html",
     image: "assets/images/case-studies/insti-app/cover.jpg",
+  },
+];
+
+/* =============================================================
+   WORK EXPERIENCE
+   -------------------------------------------------------------
+   Uses the same card system as projects while keeping its own
+   numbering and homepage section.
+   ============================================================= */
+
+const WORK_EXPERIENCE = [
+  {
+    number: "01",
+    title: "Recoup Health",
+    category: "Graphic Design",
+    link: "recoup-health.html",
+    image: "assets/images/case-studies/recoup-health/cover.jpg",
+    imageAlt: "Recoup Health graphic design work cover",
   },
 ];
