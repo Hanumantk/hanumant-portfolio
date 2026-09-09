@@ -333,7 +333,6 @@ a {
 }
 
 .scroll-cue {
-  --scroll-cue-progress: 0;
   position: absolute;
   bottom: max(1.5rem, calc(env(safe-area-inset-bottom) + 1rem));
   left: 50%;
@@ -351,14 +350,7 @@ a {
   text-align: center;
   white-space: nowrap;
   cursor: pointer;
-  opacity: calc(1 - var(--scroll-cue-progress));
-  will-change: opacity;
   transform: translateX(-50%);
-}
-
-.scroll-cue.is-past-projects {
-  visibility: hidden;
-  pointer-events: none;
 }
 
 .scroll-cue__track {

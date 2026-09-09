@@ -535,14 +535,8 @@
 
   function initScrollCue() {
     var cue = document.querySelector(".scroll-cue");
-    var projects = document.getElementById("projects");
-    if (!cue || !projects) return;
+    if (!cue) return;
 
-    function readScrollMargin() {
-      return window.getComputedStyle ? parseFloat(window.getComputedStyle(projects).scrollMarginTop) || 0 : 0;
-    }
-
-    var scrollMargin = readScrollMargin();
     var previousY = Math.max(0, window.scrollY || 0);
     var rafId = null;
     var animationTimer = null;
@@ -567,17 +561,7 @@
     function update() {
       rafId = null;
       var y = Math.max(0, window.scrollY || 0);
-      var projectTop = y + projects.getBoundingClientRect().top;
-      var projectStop = Math.max(1, projectTop - scrollMargin);
-      var quickFadeDistance = Math.max(120, Math.min(200, window.innerHeight * 0.24));
-      var fadeEnd = Math.min(projectStop, quickFadeDistance);
-      var progress = Math.min(1, Math.max(0, y / fadeEnd));
-      var gone = progress >= 0.999;
-
-      cue.style.setProperty("--scroll-cue-progress", progress.toFixed(4));
-      cue.classList.toggle("is-past-projects", gone);
-
-      if (gone) stopScrollAnimation();
+      if (curtainCoversHero) stopScrollAnimation();
       else if (y > previousY + 0.5 && !prefersReduced()) startScrollAnimation();
       previousY = y;
     }
@@ -589,10 +573,6 @@
     }
 
     window.addEventListener("scroll", scheduleUpdate, { passive: true });
-    window.addEventListener("resize", function () {
-      scrollMargin = readScrollMargin();
-      scheduleUpdate();
-    });
     addMediaListener(motionQuery, function () {
       if (prefersReduced()) stopScrollAnimation();
       scheduleUpdate();
