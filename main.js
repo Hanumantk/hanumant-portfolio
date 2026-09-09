@@ -593,7 +593,8 @@
     timeline.from("#theme-toggle", { autoAlpha: 0, scale: 0.76, duration: 0.48 }, 0)
       .from(".hero__identity > *", { autoAlpha: 0, y: 12, duration: 0.56, stagger: 0.08 }, 0.08)
       .from("#hero-copy .hero__p", { autoAlpha: 0, y: 18, duration: 0.72, stagger: 0.12 }, 0.22)
-      .from("#hero-links .hero-link", { autoAlpha: 0, y: 12, duration: 0.55, stagger: 0.07 }, 0.52);
+      .from("#hero-links .hero-links__col > .hero-link:first-child", { autoAlpha: 0, y: 12, duration: 0.55 }, 0.52)
+      .from("#hero-links .hero-links__col > .hero-link:nth-child(2)", { autoAlpha: 0, y: 12, duration: 0.55 }, 0.59);
   }
 
   function initScrollCue() {
