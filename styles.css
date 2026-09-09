@@ -584,20 +584,33 @@ a {
     content: "";
     position: absolute;
     z-index: -1;
-    top: -36px;
+    top: -72px;
     right: 0;
     left: 0;
-    height: 36px;
+    height: 72px;
     pointer-events: none;
     background: linear-gradient(
       to bottom,
       transparent 0%,
-      color-mix(in srgb, var(--grad-bottom) 14%, transparent) 100%
+      color-mix(in srgb, var(--grad-bottom) 5%, transparent) 34%,
+      color-mix(in srgb, var(--grad-bottom) 18%, transparent) 100%
     );
-    -webkit-backdrop-filter: blur(5px);
-    backdrop-filter: blur(5px);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 72%, #000 100%);
-    mask-image: linear-gradient(to bottom, transparent 0%, #000 72%, #000 100%);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(0, 0, 0, 0.2) 28%,
+      rgba(0, 0, 0, 0.72) 70%,
+      #000 100%
+    );
+    mask-image: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(0, 0, 0, 0.2) 28%,
+      rgba(0, 0, 0, 0.72) 70%,
+      #000 100%
+    );
   }
 }
 
