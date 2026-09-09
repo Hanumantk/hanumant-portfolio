@@ -313,7 +313,7 @@ a {
   margin: 0 auto;
   padding-top: max(26vh, calc(env(safe-area-inset-top) + 4rem));
   padding-right: max(var(--page-gutter), env(safe-area-inset-right));
-  padding-bottom: max(6rem, calc(env(safe-area-inset-bottom) + 5rem));
+  padding-bottom: max(10rem, calc(env(safe-area-inset-bottom) + 9rem));
   padding-left: max(var(--page-gutter), env(safe-area-inset-left));
 }
 
@@ -334,38 +334,37 @@ a {
   position: absolute;
   bottom: max(1.5rem, calc(env(safe-area-inset-bottom) + 1rem));
   left: 50%;
-  display: grid;
-  grid-template-columns: max-content 78px;
+  display: flex;
+  flex-direction: column;
   align-items: center;
+  gap: 18px;
   width: max-content;
   max-width: calc(100% - (2 * var(--page-gutter)));
   z-index: 2;
   color: var(--c-text);
-  font-size: clamp(20px, 2vw, 24px);
-  font-weight: 500;
-  line-height: 1.08;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 1.4;
+  text-align: center;
   white-space: nowrap;
   cursor: pointer;
   transform: translateX(-50%);
 }
 
-.scroll-cue__label {
-  transition: transform 320ms var(--ease-out);
-}
-
 .scroll-cue__track {
   display: flex;
-  width: 78px;
-  height: 58px;
+  width: 70px;
+  height: 70px;
   align-items: center;
   justify-content: flex-end;
+  transform: translateX(-10px);
 }
 
 .scroll-cue__button {
   position: relative;
   display: inline-flex;
-  width: 58px;
-  height: 58px;
+  width: 50px;
+  height: 50px;
   flex: 0 0 auto;
   align-items: center;
   justify-content: center;
@@ -373,6 +372,7 @@ a {
   border: 1px solid currentColor;
   border-radius: 999px;
   background: transparent;
+  transform: rotate(45deg);
   transition: width 320ms var(--ease-out);
 }
 
@@ -381,8 +381,8 @@ a {
   top: 50%;
   left: 50%;
   display: block;
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   transform: translate(-50%, -50%);
 }
 
@@ -391,13 +391,9 @@ a {
 }
 
 .scroll-cue:focus-visible .scroll-cue__button {
-  width: 78px;
+  width: 70px;
   outline: 3px solid var(--c-focus);
   outline-offset: 4px;
-}
-
-.scroll-cue:focus-visible .scroll-cue__label {
-  transform: translateX(-20px);
 }
 
 .scroll-cue:focus-visible .scroll-cue__button svg {
@@ -411,12 +407,12 @@ a {
   }
 
   38% {
-    transform: translate(-50%, -50%) translateX(48px);
+    transform: translate(-50%, -50%) translateX(58px);
   }
 
   38.01%,
   54% {
-    transform: translate(-50%, -50%) translateX(-48px);
+    transform: translate(-50%, -50%) translateX(-58px);
   }
 
   100% {
@@ -822,12 +818,8 @@ body.is-project-opening .group.is-opening {
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .scroll-cue:hover .scroll-cue__label {
-    transform: translateX(-20px);
-  }
-
   .scroll-cue:hover .scroll-cue__button {
-    width: 78px;
+    width: 70px;
   }
 
   .scroll-cue:hover .scroll-cue__button svg {
