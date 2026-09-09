@@ -531,6 +531,71 @@
       .from("#hero-links .hero-link", { autoAlpha: 0, y: 12, duration: 0.55, stagger: 0.07 }, 0.52);
   }
 
+  function initScrollCue() {
+    var cue = document.querySelector(".scroll-cue");
+    var projects = document.getElementById("projects");
+    if (!cue || !projects) return;
+
+    function readScrollMargin() {
+      return window.getComputedStyle ? parseFloat(window.getComputedStyle(projects).scrollMarginTop) || 0 : 0;
+    }
+
+    var scrollMargin = readScrollMargin();
+    var previousY = Math.max(0, window.scrollY || 0);
+    var rafId = null;
+    var animationTimer = null;
+
+    function stopScrollAnimation() {
+      if (animationTimer !== null) {
+        window.clearTimeout(animationTimer);
+        animationTimer = null;
+      }
+      cue.classList.remove("is-scroll-animating");
+    }
+
+    function startScrollAnimation() {
+      if (animationTimer !== null) return;
+      cue.classList.add("is-scroll-animating");
+      animationTimer = window.setTimeout(function () {
+        animationTimer = null;
+        cue.classList.remove("is-scroll-animating");
+      }, 660);
+    }
+
+    function update() {
+      rafId = null;
+      var y = Math.max(0, window.scrollY || 0);
+      var projectTop = y + projects.getBoundingClientRect().top;
+      var fadeEnd = Math.max(1, projectTop - scrollMargin);
+      var progress = Math.min(1, Math.max(0, y / fadeEnd));
+      var gone = progress >= 0.999;
+
+      cue.style.setProperty("--scroll-cue-progress", progress.toFixed(4));
+      cue.classList.toggle("is-past-projects", gone);
+
+      if (gone) stopScrollAnimation();
+      else if (y > previousY + 0.5 && !prefersReduced()) startScrollAnimation();
+      previousY = y;
+    }
+
+    function scheduleUpdate() {
+      if (rafId !== null) return;
+      if (window.requestAnimationFrame) rafId = window.requestAnimationFrame(update);
+      else update();
+    }
+
+    window.addEventListener("scroll", scheduleUpdate, { passive: true });
+    window.addEventListener("resize", function () {
+      scrollMargin = readScrollMargin();
+      scheduleUpdate();
+    });
+    addMediaListener(motionQuery, function () {
+      if (prefersReduced()) stopScrollAnimation();
+      scheduleUpdate();
+    });
+    scheduleUpdate();
+  }
+
   function setPageInert(value) {
     [document.querySelector(".skip-link"), document.querySelector(".hero-band"), document.querySelector(".main"), document.querySelector(".footer")].forEach(function (node) {
       if (node && "inert" in node) node.inert = value;
@@ -892,6 +957,7 @@
     });
 
     if (returningFromDetail) restoreProjectScroll();
+    initScrollCue();
     runIntro(returningFromDetail);
     initFooterMotion();
   }
