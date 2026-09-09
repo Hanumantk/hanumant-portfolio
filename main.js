@@ -86,6 +86,7 @@
   var themeRaf = null;
   var themeTransitionId = 0;
   var themeTransitionActive = false;
+  var themePreludeActive = false;
   var dotField = null;
   var pageIsInert = false;
   var curtainCoversHero = false;
@@ -160,6 +161,72 @@
       if (active) dot.setAttribute("data-active", "");
       else dot.removeAttribute("data-active");
       dot.setAttribute("aria-pressed", String(active));
+    });
+  }
+
+  function playThemeTogglePrelude(originElement) {
+    var toggle = document.getElementById("theme-toggle");
+    var bead = toggle && toggle.querySelector(".theme-dots__bead");
+    var activeDot = toggle && toggle.querySelector("[data-active]");
+
+    if (
+      prefersReduced() ||
+      document.hidden ||
+      !toggle ||
+      !bead ||
+      !activeDot ||
+      !originElement ||
+      typeof bead.animate !== "function"
+    ) return Promise.resolve();
+
+    var toggleRect = toggle.getBoundingClientRect();
+    var fromRect = activeDot.getBoundingClientRect();
+    var toRect = originElement.getBoundingClientRect();
+    var fromCenterX = fromRect.left - toggleRect.left + fromRect.width / 2;
+    var fromCenterY = fromRect.top - toggleRect.top + fromRect.height / 2;
+    var toCenterX = toRect.left - toggleRect.left + toRect.width / 2;
+    var toCenterY = toRect.top - toggleRect.top + toRect.height / 2;
+    var direction = toCenterX >= fromCenterX ? 1 : -1;
+    var startX = fromCenterX + direction * 13;
+
+    if (![startX, fromCenterY, toCenterX, toCenterY].every(Number.isFinite)) return Promise.resolve();
+
+    toggle.classList.add("is-switching");
+    var animation;
+
+    try {
+      animation = bead.animate(
+        [
+          {
+            left: startX + "px",
+            top: fromCenterY + "px",
+            opacity: 0,
+            transform: "translate(-50%, -50%) scale(0.55)"
+          },
+          {
+            left: startX + direction * 5 + "px",
+            top: fromCenterY + "px",
+            opacity: 1,
+            transform: "translate(-50%, -50%) scale(1)",
+            offset: 0.2
+          },
+          {
+            left: toCenterX + "px",
+            top: toCenterY + "px",
+            opacity: 1,
+            transform: "translate(-50%, -50%) scale(1)"
+          }
+        ],
+        { duration: 108, easing: "cubic-bezier(0.4,0,0.2,1)", fill: "both" }
+      );
+    } catch (e) {
+      toggle.classList.remove("is-switching");
+      return Promise.resolve();
+    }
+
+    return animation.finished.catch(function () {}).then(function () {
+      try { animation.cancel(); } catch (e) {}
+      toggle.classList.remove("is-switching");
     });
   }
 
@@ -1015,7 +1082,22 @@
     updateThemeColor(themeName);
 
     document.querySelectorAll("#theme-toggle [data-theme-set]").forEach(function (dot) {
-      dot.addEventListener("click", function () { setTheme(dot.getAttribute("data-theme-set"), true, dot); });
+      dot.addEventListener("click", function () {
+        var next = dot.getAttribute("data-theme-set");
+        if (next === themeName || themeTransitionActive || themePreludeActive) return;
+
+        if (prefersReduced() || document.hidden) {
+          setTheme(next, true, dot);
+          return;
+        }
+
+        var previous = themeName;
+        themePreludeActive = true;
+        playThemeTogglePrelude(dot).then(function () {
+          themePreludeActive = false;
+          if (themeName === previous) setTheme(next, true, dot);
+        });
+      });
     });
 
     var systemQuery = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
