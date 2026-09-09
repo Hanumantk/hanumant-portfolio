@@ -78,6 +78,10 @@ html {
   scroll-behavior: smooth;
 }
 
+html.lenis {
+  scroll-behavior: auto;
+}
+
 body {
   position: relative;
   min-height: 100vh;

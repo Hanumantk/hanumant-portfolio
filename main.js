@@ -7,6 +7,8 @@
   var finePointerQuery = window.matchMedia ? window.matchMedia("(hover: hover) and (pointer: fine)") : null;
   var gsap = window.gsap || null;
   var ScrollTrigger = window.ScrollTrigger || null;
+  var homeLenis = null;
+  var homeLenisTicker = null;
 
   if (gsap && ScrollTrigger) gsap.registerPlugin(ScrollTrigger);
 
@@ -18,6 +20,50 @@
     if (!query) return;
     if (query.addEventListener) query.addEventListener("change", fn);
     else if (query.addListener) query.addListener(fn);
+  }
+
+  function initHomeLenis() {
+    if (homeLenis || prefersReduced() || document.body.classList.contains("intro-active") || document.body.getAttribute("data-smooth-scroll") !== "true" || typeof window.Lenis !== "function") return;
+    var useGsapTicker = !!gsap;
+    homeLenis = new window.Lenis({
+      autoRaf: !useGsapTicker,
+      anchors: true,
+      stopInertiaOnNavigate: true,
+      respectReducedMotion: true,
+      smoothWheel: true,
+      syncTouch: false,
+      lerp: 0.07,
+      wheelMultiplier: 0.88
+    });
+    window.homeLenis = homeLenis;
+
+    if (ScrollTrigger) homeLenis.on("scroll", ScrollTrigger.update);
+    if (useGsapTicker) {
+      homeLenisTicker = function (time) { homeLenis.raf(time * 1000); };
+      gsap.ticker.add(homeLenisTicker);
+      gsap.ticker.lagSmoothing(0);
+    }
+  }
+
+  function stopHomeLenis() {
+    if (homeLenis) homeLenis.stop();
+  }
+
+  function destroyHomeLenis() {
+    if (!homeLenis) return;
+    if (gsap && homeLenisTicker) gsap.ticker.remove(homeLenisTicker);
+    homeLenisTicker = null;
+    try { homeLenis.destroy(); } catch (e) {}
+    homeLenis = null;
+    window.homeLenis = null;
+    root.classList.remove("lenis", "lenis-smooth", "lenis-scrolling", "lenis-stopped");
+  }
+
+  function resumeHomeLenis() {
+    if (!homeLenis || prefersReduced() || document.body.classList.contains("intro-active")) return;
+    homeLenis.start();
+    homeLenis.resize();
+    try { homeLenis.scrollTo(window.scrollY, { immediate: true, force: true }); } catch (e) {}
   }
 
   var THEME = {
@@ -293,10 +339,22 @@
 
     var oldBehavior = root.style.scrollBehavior;
     root.style.scrollBehavior = "auto";
-    window.scrollTo(0, y);
-    requestAnimationFrame(function () {
+
+    function applyPosition() {
+      if (homeLenis) {
+        try {
+          homeLenis.scrollTo(y, { immediate: true, force: true });
+          return;
+        } catch (e) {}
+      }
       window.scrollTo(0, y);
+    }
+
+    applyPosition();
+    requestAnimationFrame(function () {
+      applyPosition();
       requestAnimationFrame(function () {
+        applyPosition();
         root.style.scrollBehavior = oldBehavior;
         restoreProjectFocus();
       });
@@ -335,6 +393,7 @@
     event.preventDefault();
     if (projectNavigationPending) return;
     projectNavigationPending = true;
+    stopHomeLenis();
     navigateToProject(destination, anchor);
   }
 
@@ -343,7 +402,10 @@
     document.body.classList.remove("is-project-opening");
     document.querySelectorAll(".group.is-opening").forEach(function (group) { group.classList.remove("is-opening"); });
     if (gsap) gsap.set([".feed__head", ".group"], { clearProps: "opacity,visibility,transform" });
-    if (event && event.persisted && consumeProjectReturn()) restoreProjectScroll();
+    if (event && event.persisted) {
+      resumeHomeLenis();
+      if (consumeProjectReturn()) restoreProjectScroll();
+    }
   }
 
   window.addEventListener("pageshow", resetProjectNavigation);
@@ -476,7 +538,8 @@
     var topButton = createElement("button", "footer__top", "Back to top");
     topButton.type = "button";
     topButton.addEventListener("click", function () {
-      window.scrollTo({ top: 0, behavior: prefersReduced() ? "auto" : "smooth" });
+      if (homeLenis && !prefersReduced()) homeLenis.scrollTo(0);
+      else window.scrollTo({ top: 0, behavior: prefersReduced() ? "auto" : "smooth" });
     });
     topItem.appendChild(topButton);
     list.appendChild(topItem);
@@ -643,6 +706,8 @@
       setPageInert(false);
       document.removeEventListener("keydown", onKeydown);
       clearTimeout(removeTimer);
+      initHomeLenis();
+      resumeHomeLenis();
       if (ScrollTrigger) ScrollTrigger.refresh();
     }
 
@@ -974,21 +1039,31 @@
     }
 
     addMediaListener(motionQuery, function () {
-      if (!prefersReduced()) return;
-      if (gsap) gsap.globalTimeline.clear();
-      showCardsImmediately();
-      if (dotField) {
-        dotField.destroy();
-        dotField = null;
-        document.body.classList.remove("dotfield-on");
+      if (prefersReduced()) {
+        destroyHomeLenis();
+        if (gsap) gsap.globalTimeline.clear();
+        showCardsImmediately();
+        if (dotField) {
+          dotField.destroy();
+          dotField = null;
+          document.body.classList.remove("dotfield-on");
+        }
+        return;
       }
+
+      initHomeLenis();
+      resumeHomeLenis();
+      if (ScrollTrigger) ScrollTrigger.refresh();
     });
 
     if (returningFromDetail) restoreProjectScroll();
     initContentCurtain();
     initScrollCue();
     runIntro(returningFromDetail);
+    initHomeLenis();
+    resumeHomeLenis();
     initFooterMotion();
+    window.addEventListener("pagehide", stopHomeLenis);
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
