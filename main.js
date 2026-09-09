@@ -567,7 +567,7 @@
       var y = Math.max(0, window.scrollY || 0);
       var projectTop = y + projects.getBoundingClientRect().top;
       var projectStop = Math.max(1, projectTop - scrollMargin);
-      var quickFadeDistance = Math.max(90, Math.min(150, window.innerHeight * 0.18));
+      var quickFadeDistance = Math.max(120, Math.min(200, window.innerHeight * 0.24));
       var fadeEnd = Math.min(projectStop, quickFadeDistance);
       var progress = Math.min(1, Math.max(0, y / fadeEnd));
       var gone = progress >= 0.999;
