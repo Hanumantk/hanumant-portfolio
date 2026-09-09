@@ -302,8 +302,8 @@ a {
   z-index: 0;
   top: 0;
   width: 100%;
-  min-height: 100vh;
-  min-height: 100svh;
+  min-height: calc(100vh + 2px);
+  min-height: calc(100svh + 2px);
   font-family: "Poppins", "Public Sans", ui-sans-serif, system-ui, sans-serif;
 }
 
