@@ -98,7 +98,7 @@ body.intro-active {
 body::before,
 body::after {
   content: "";
-  position: absolute;
+  position: fixed;
   inset: 0;
   pointer-events: none;
 }
@@ -294,7 +294,9 @@ a {
 }
 
 .hero-band {
-  position: relative;
+  position: sticky;
+  z-index: 0;
+  top: 0;
   width: 100%;
   min-height: 100vh;
   min-height: 100svh;
@@ -570,6 +572,16 @@ a {
 
 .theme-dots__dot[data-active]::after {
   transform: scale(1);
+}
+
+.content-curtain {
+  position: relative;
+  z-index: 3;
+  min-height: 100vh;
+  min-height: 100dvh;
+  isolation: isolate;
+  background: var(--grad-bottom);
+  box-shadow: 0 -1px 0 var(--c-border);
 }
 
 .main {

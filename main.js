@@ -41,6 +41,8 @@
   var themeTransitionId = 0;
   var themeTransitionActive = false;
   var dotField = null;
+  var pageIsInert = false;
+  var curtainCoversHero = false;
 
   function systemTheme() {
     return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
@@ -598,10 +600,44 @@
     scheduleUpdate();
   }
 
+  function syncHeroInert() {
+    var hero = document.querySelector(".hero-band");
+    if (hero && "inert" in hero) hero.inert = pageIsInert || curtainCoversHero;
+  }
+
+  function initContentCurtain() {
+    var curtain = document.querySelector(".content-curtain");
+    if (!curtain) return;
+
+    var rafId = null;
+
+    function update() {
+      rafId = null;
+      var covered = curtain.getBoundingClientRect().top <= 0.5;
+      if (covered === curtainCoversHero) return;
+      curtainCoversHero = covered;
+      syncHeroInert();
+      if (dotField && typeof dotField.setCovered === "function") dotField.setCovered(covered);
+    }
+
+    function scheduleUpdate() {
+      if (rafId !== null) return;
+      if (window.requestAnimationFrame) rafId = window.requestAnimationFrame(update);
+      else update();
+    }
+
+    window.addEventListener("scroll", scheduleUpdate, { passive: true });
+    window.addEventListener("resize", scheduleUpdate);
+    window.addEventListener("pageshow", scheduleUpdate);
+    update();
+  }
+
   function setPageInert(value) {
-    [document.querySelector(".skip-link"), document.querySelector(".hero-band"), document.querySelector(".main"), document.querySelector(".footer")].forEach(function (node) {
+    pageIsInert = value;
+    [document.querySelector(".skip-link"), document.querySelector(".main"), document.querySelector(".footer")].forEach(function (node) {
       if (node && "inert" in node) node.inert = value;
     });
+    syncHeroInert();
   }
 
   function runIntro(returningFromDetail) {
@@ -671,6 +707,7 @@
     var geometryRaf = null;
     var running = false;
     var inView = true;
+    var covered = false;
     var ignitionStart = 0;
     var igniting = false;
     var maxDistance = 1;
@@ -818,7 +855,7 @@
     }
 
     function onScroll() {
-      if (!inView || geometryRaf !== null) return;
+      if (!inView || covered || geometryRaf !== null) return;
       geometryRaf = requestAnimationFrame(function () {
         geometryRaf = null;
         rect = canvas.getBoundingClientRect();
@@ -827,7 +864,7 @@
 
     function onVisibility() {
       if (document.hidden) stop();
-      else if (inView && !prefersReduced()) start();
+      else if (inView && !covered && !prefersReduced()) start();
     }
 
     window.addEventListener("pointermove", onPointerMove, { passive: true });
@@ -841,7 +878,7 @@
     if ("IntersectionObserver" in window) {
       observer = new IntersectionObserver(function (entries) {
         inView = entries[0].isIntersecting;
-        if (inView && !document.hidden && !prefersReduced()) start();
+        if (inView && !covered && !document.hidden && !prefersReduced()) start();
         else stop();
       });
       observer.observe(hero);
@@ -866,6 +903,15 @@
       ignitionStart = performance.now();
       igniting = true;
       wake();
+    };
+    this.setCovered = function (value) {
+      covered = !!value;
+      pointer.active = false;
+      if (covered) stop();
+      else if (inView && !document.hidden && !prefersReduced()) {
+        rect = canvas.getBoundingClientRect();
+        start();
+      }
     };
     this.destroy = function () {
       stop();
@@ -959,6 +1005,7 @@
     });
 
     if (returningFromDetail) restoreProjectScroll();
+    initContentCurtain();
     initScrollCue();
     runIntro(returningFromDetail);
     initFooterMotion();
