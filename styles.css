@@ -536,7 +536,6 @@ a {
 }
 
 .theme-dots {
-  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 2px;
@@ -561,7 +560,6 @@ a {
   inset: 0;
   margin: auto;
   border-radius: 50%;
-  pointer-events: none;
 }
 
 .theme-dots__dot::before {
@@ -569,7 +567,7 @@ a {
   height: 26px;
   background: var(--c-control-dot);
   transform: scale(0.6154);
-  transition: background 110ms ease-out, box-shadow 110ms ease-out, transform var(--dur-fast) var(--ease-out-back);
+  transition: background var(--dur-fast) ease, box-shadow var(--dur-fast) ease, transform var(--dur-fast) var(--ease-out-back);
 }
 
 .theme-dots__dot::after {
@@ -587,89 +585,7 @@ a {
 }
 
 .theme-dots__dot[data-active]::after {
-  transform: scale(0);
-}
-
-.theme-dots__arrow {
-  position: absolute;
-  z-index: 2;
-  inset: 0;
-  width: 13px;
-  height: 13px;
-  margin: auto;
-  color: var(--grad-bottom);
-  opacity: 0;
-  pointer-events: none;
-  transform: scale(0.45);
-  transition: opacity 90ms ease-out, transform 110ms var(--ease-out);
-}
-
-.theme-dots__arrow path {
-  stroke: currentColor;
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.theme-dots__dot--dark .theme-dots__arrow {
-  transform: rotate(180deg) scale(0.45);
-}
-
-.theme-dots__bead {
-  position: absolute;
-  z-index: 3;
-  top: 0;
-  left: 0;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--c-accent);
-  opacity: 0;
-  pointer-events: none;
-  will-change: left, top, opacity, transform;
-}
-
-.theme-dots:not(.is-switching):focus-within .theme-dots__dot[data-active]::before,
-.theme-dots:not(.is-switching):focus-within .theme-dots__dot:not([data-active])::before {
-  background: var(--c-accent);
-}
-
-.theme-dots:not(.is-switching):focus-within .theme-dots__dot[data-active] .theme-dots__arrow {
-  opacity: 1;
   transform: scale(1);
-}
-
-.theme-dots:not(.is-switching):focus-within .theme-dots__dot--dark[data-active] .theme-dots__arrow {
-  transform: rotate(180deg) scale(1);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .theme-dots:not(.is-switching):hover .theme-dots__dot[data-active]::before,
-  .theme-dots:not(.is-switching):hover .theme-dots__dot:not([data-active])::before {
-    background: var(--c-accent);
-  }
-
-  .theme-dots:not(.is-switching):hover .theme-dots__dot[data-active] .theme-dots__arrow {
-    opacity: 1;
-    transform: scale(1);
-  }
-
-  .theme-dots:not(.is-switching):hover .theme-dots__dot--dark[data-active] .theme-dots__arrow {
-    transform: rotate(180deg) scale(1);
-  }
-
-  .theme-dots:not(.is-switching):active .theme-dots__dot[data-active]::before {
-    background: transparent;
-    transform: scale(0.94);
-  }
-
-  .theme-dots:not(.is-switching):active .theme-dots__dot:not([data-active])::before {
-    background: var(--c-control-dot);
-  }
-
-  .theme-dots:not(.is-switching):active .theme-dots__dot[data-active] .theme-dots__arrow {
-    opacity: 0;
-  }
 }
 
 .content-curtain {
