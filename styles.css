@@ -372,7 +372,7 @@ a {
   border: 1px solid currentColor;
   border-radius: 999px;
   background: transparent;
-  transform: rotate(45deg);
+  transform: rotate(90deg);
   transition: width 320ms var(--ease-out);
 }
 
