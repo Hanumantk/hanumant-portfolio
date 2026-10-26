@@ -87,6 +87,7 @@
   var themeTransitionId = 0;
   var themeTransitionActive = false;
   var dotField = null;
+  var footerShader = null;
   var pageIsInert = false;
   var curtainCoversHero = false;
 
@@ -228,6 +229,7 @@
 
     var previous = themeName;
     themeName = next;
+    if (footerShader) footerShader.setTheme(next);
     themeTransitionId += 1;
     var transitionId = themeTransitionId;
     try { localStorage.setItem("theme", next); } catch (e) {}
@@ -976,6 +978,359 @@
     };
   }
 
+  var FOOTER_PALETTE = {
+    light: { bg: "#ffffff", base: "#edf1f5", low: "#cde4ff", mid: "#78b9ff", high: "#086ed7" },
+    dark: { bg: "#000000", base: "#0e1621", low: "#152538", mid: "#1f5fae", high: "#63adff" }
+  };
+
+  var FOOTER_VERTEX = "attribute vec2 aPos; varying vec2 vUv; void main() { vUv = aPos * 0.5 + 0.5; gl_Position = vec4(aPos, 0.0, 1.0); }";
+
+  // Flowing color inside the wordmark, with a rippling lens and color split around the pointer.
+  var FOOTER_FRAGMENT = [
+    "#ifdef GL_FRAGMENT_PRECISION_HIGH",
+    "precision highp float;",
+    "#else",
+    "precision mediump float;",
+    "#endif",
+    "varying vec2 vUv;",
+    "uniform sampler2D uMask;",
+    "uniform vec2 uRes;",
+    "uniform vec2 uPointer;",
+    "uniform float uTime;",
+    "uniform float uHover;",
+    "uniform float uReveal;",
+    "uniform float uFont;",
+    "uniform float uCapTop;",
+    "uniform float uFloor;",
+    "uniform vec3 uBg;",
+    "uniform vec3 uBase;",
+    "uniform vec3 uLow;",
+    "uniform vec3 uMid;",
+    "uniform vec3 uHigh;",
+    "float hash(vec2 p) { p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }",
+    "float noise(vec2 p) {",
+    "  vec2 i = floor(p); vec2 f = fract(p); vec2 u = f * f * (3.0 - 2.0 * f);",
+    "  return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), u.x), mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x), u.y);",
+    "}",
+    "float fbm(vec2 p) {",
+    "  float v = 0.0; float a = 0.5;",
+    "  for (int i = 0; i < 4; i++) { v += a * noise(p); p = p * 2.03 + vec2(1.7, 9.2); a *= 0.5; }",
+    "  return v;",
+    "}",
+    "float mask(vec2 p) { return texture2D(uMask, vec2(p.x / uRes.x, 1.0 - p.y / uRes.y)).a; }",
+    "void main() {",
+    "  vec2 p = vec2(vUv.x, 1.0 - vUv.y) * uRes;",
+    "  vec2 d = p - uPointer;",
+    "  float dist = length(d);",
+    "  vec2 dir = d / max(dist, 1.0);",
+    "  float glow = uHover * exp(-dist * dist / (uFont * uFont * 0.5));",
+    "  float wave = sin(dist / uFont * 14.0 - uTime * 5.0);",
+    "  vec2 warp = dir * (wave * 0.016 - 0.03) * glow * uFont;",
+    "  warp += vec2(sin(p.y / uFont * 6.0 + uTime * 1.1), cos(p.x / uFont * 4.5 + uTime * 0.8)) * uFont * 0.004;",
+    "  float split = glow * uFont * 0.018;",
+    "  vec2 q = p + warp;",
+    "  float mG = mask(q);",
+    "  float mR = mask(q + dir * split);",
+    "  float mB = mask(q - dir * split);",
+    "  float a = max(mG, max(mR, mB));",
+    "  if (a < 0.002) { gl_FragColor = vec4(0.0); return; }",
+    "  vec2 n = p / uFont;",
+    "  vec2 w = vec2(fbm(n * 1.1 + vec2(0.0, uTime * 0.07)), fbm(n * 1.1 + vec2(5.2, -uTime * 0.06)));",
+    "  float f = fbm(n * 1.5 + w * 1.6 + vec2(uTime * 0.05, 0.0));",
+    "  float depth = clamp((p.y - uCapTop) / max(uFloor - uCapTop, 1.0), 0.0, 1.0);",
+    "  vec3 flow = mix(uLow, uMid, smoothstep(0.32, 0.62, f));",
+    "  flow = mix(flow, uHigh, smoothstep(0.5, 0.78, f) * (0.25 + 0.75 * depth));",
+    "  float reveal = clamp((uReveal * 1.3 - vUv.x) / 0.3, 0.0, 1.0);",
+    "  float amount = clamp(reveal * (0.25 + 0.7 * depth) + glow * 0.6, 0.0, 1.0);",
+    "  vec3 col = mix(uBase, flow, amount);",
+    "  gl_FragColor = vec4(uBg * a + (col - uBg) * vec3(mR, mG, mB), a);",
+    "}"
+  ].join("\n");
+
+  function FooterShader(frame, mark) {
+    var canvas = createElement("canvas", "footer__mark-canvas");
+    canvas.setAttribute("aria-hidden", "true");
+    var gl = canvas.getContext("webgl", { alpha: true, premultipliedAlpha: true, antialias: false }) ||
+      canvas.getContext("experimental-webgl", { alpha: true, premultipliedAlpha: true, antialias: false });
+    if (!gl) throw new Error("WebGL unavailable");
+
+    function compile(type, source) {
+      var shader = gl.createShader(type);
+      gl.shaderSource(shader, source);
+      gl.compileShader(shader);
+      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(shader));
+      return shader;
+    }
+
+    var program = gl.createProgram();
+    gl.attachShader(program, compile(gl.VERTEX_SHADER, FOOTER_VERTEX));
+    gl.attachShader(program, compile(gl.FRAGMENT_SHADER, FOOTER_FRAGMENT));
+    gl.linkProgram(program);
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(program));
+    gl.useProgram(program);
+
+    var buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+    var positionLocation = gl.getAttribLocation(program, "aPos");
+    gl.enableVertexAttribArray(positionLocation);
+    gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+    var texture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+
+    var uniforms = {};
+    ["uMask", "uRes", "uPointer", "uTime", "uHover", "uReveal", "uFont", "uCapTop", "uFloor", "uBg", "uBase", "uLow", "uMid", "uHigh"].forEach(function (name) {
+      uniforms[name] = gl.getUniformLocation(program, name);
+    });
+    gl.uniform1i(uniforms.uMask, 0);
+
+    var maskCanvas = document.createElement("canvas");
+    var maskContext = maskCanvas.getContext("2d");
+    var COLOR_KEYS = ["bg", "base", "low", "mid", "high"];
+    var colors = {};
+    var targetColors = {};
+    var dpr = 1;
+    var fontPx = 1;
+    var capTop = 0;
+    var floor = 1;
+    var pointer = { x: -9999, y: -9999, targetX: -9999, targetY: -9999 };
+    var hover = 0;
+    var hoverTarget = 0;
+    var revealStart = null;
+    var reveal = 0;
+    var startTime = performance.now();
+    var rafId = null;
+    var running = false;
+    var inView = false;
+    var ready = false;
+    var destroyed = false;
+    var observer = null;
+    var resizeObserver = null;
+
+    function toUnit(hex) {
+      var color = parseColor(hex);
+      return [color[0] / 255, color[1] / 255, color[2] / 255];
+    }
+
+    function applyPalette(theme, immediate) {
+      var palette = FOOTER_PALETTE[theme] || FOOTER_PALETTE.light;
+      COLOR_KEYS.forEach(function (key) {
+        targetColors[key] = toUnit(palette[key]);
+        if (immediate || !colors[key]) colors[key] = targetColors[key].slice();
+      });
+    }
+
+    function measure() {
+      if (destroyed) return;
+      var style = getComputedStyle(mark);
+      var text = mark.textContent || "";
+      var width = mark.offsetWidth;
+      var lineHeight = mark.offsetHeight;
+      var fontSize = parseFloat(style.fontSize) || 100;
+      var letterSpacing = parseFloat(style.letterSpacing) || 0;
+      var pad = Math.round(fontSize * 0.3);
+      var height = lineHeight + pad * 2;
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+      canvas.style.top = -pad + "px";
+      canvas.style.height = height + "px";
+      canvas.width = maskCanvas.width = Math.max(1, Math.round(width * dpr));
+      canvas.height = maskCanvas.height = Math.max(1, Math.round(height * dpr));
+
+      maskContext.setTransform(1, 0, 0, 1, 0, 0);
+      maskContext.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
+      maskContext.setTransform(dpr, 0, 0, dpr, 0, 0);
+      maskContext.font = style.fontWeight + " " + fontSize + "px " + style.fontFamily;
+      maskContext.textBaseline = "alphabetic";
+      maskContext.fillStyle = "#fff";
+
+      var metrics = maskContext.measureText(text);
+      var ascent = metrics.fontBoundingBoxAscent || fontSize * 0.95;
+      var descent = metrics.fontBoundingBoxDescent || fontSize * 0.25;
+      var baseline = pad + (lineHeight - ascent - descent) / 2 + ascent;
+      var textNode = mark.firstChild && mark.firstChild.nodeType === 3 ? mark.firstChild : null;
+      var range = textNode && document.createRange ? document.createRange() : null;
+      var markLeft = 0;
+      var previousTransform = mark.style.transform;
+
+      // Place each glyph where the browser laid out the DOM text, so kerning and letter-spacing match exactly.
+      if (range) {
+        mark.style.transform = "none";
+        markLeft = mark.getBoundingClientRect().left;
+        range.selectNodeContents(textNode);
+        var lineRect = range.getBoundingClientRect();
+        if (lineRect.height) baseline = pad + lineRect.top - mark.getBoundingClientRect().top + ascent;
+      }
+      var fallbackX = (width - metrics.width - letterSpacing * text.length) / 2;
+      for (var i = 0; i < text.length; i += 1) {
+        var x = fallbackX + maskContext.measureText(text.slice(0, i)).width + letterSpacing * i;
+        if (range) {
+          range.setStart(textNode, i);
+          range.setEnd(textNode, i + 1);
+          x = range.getBoundingClientRect().left - markLeft;
+        }
+        maskContext.fillText(text.charAt(i), x, baseline);
+      }
+      if (range) mark.style.transform = previousTransform;
+
+      var capHeight = maskContext.measureText("H").actualBoundingBoxAscent || fontSize * 0.7;
+      var frameBottom = frame.getBoundingClientRect().bottom - canvas.getBoundingClientRect().top;
+      fontPx = fontSize * dpr;
+      capTop = (baseline - capHeight) * dpr;
+      floor = Math.min(frameBottom, height) * dpr;
+
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, maskCanvas);
+      gl.viewport(0, 0, canvas.width, canvas.height);
+      ready = true;
+      render(performance.now());
+      mark.classList.add("has-shader");
+    }
+
+    function render(now) {
+      gl.uniform2f(uniforms.uRes, canvas.width, canvas.height);
+      gl.uniform2f(uniforms.uPointer, pointer.x, pointer.y);
+      gl.uniform1f(uniforms.uTime, ((now - startTime) / 1000) % 1000);
+      gl.uniform1f(uniforms.uHover, hover);
+      gl.uniform1f(uniforms.uReveal, reveal);
+      gl.uniform1f(uniforms.uFont, fontPx);
+      gl.uniform1f(uniforms.uCapTop, capTop);
+      gl.uniform1f(uniforms.uFloor, floor);
+      gl.uniform3fv(uniforms.uBg, colors.bg);
+      gl.uniform3fv(uniforms.uBase, colors.base);
+      gl.uniform3fv(uniforms.uLow, colors.low);
+      gl.uniform3fv(uniforms.uMid, colors.mid);
+      gl.uniform3fv(uniforms.uHigh, colors.high);
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    }
+
+    function tick(now) {
+      rafId = null;
+      if (!running || !ready) return;
+      if (revealStart === null) revealStart = now;
+      reveal = easeInOut(Math.min((now - revealStart) / 1600, 1));
+      hover += (hoverTarget - hover) * 0.08;
+      pointer.x += (pointer.targetX - pointer.x) * 0.2;
+      pointer.y += (pointer.targetY - pointer.y) * 0.2;
+      COLOR_KEYS.forEach(function (key) {
+        for (var c = 0; c < 3; c += 1) colors[key][c] += (targetColors[key][c] - colors[key][c]) * 0.12;
+      });
+      render(now);
+      rafId = requestAnimationFrame(tick);
+    }
+
+    function start() {
+      if (running || destroyed) return;
+      running = true;
+      if (rafId === null) rafId = requestAnimationFrame(tick);
+    }
+
+    function stop() {
+      running = false;
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      rafId = null;
+    }
+
+    function syncRunning() {
+      if (inView && !document.hidden && !prefersReduced()) start();
+      else stop();
+    }
+
+    function onPointerMove(event) {
+      var rect = canvas.getBoundingClientRect();
+      var x = (event.clientX - rect.left) * dpr;
+      var y = (event.clientY - rect.top) * dpr;
+      if (hover < 0.02) {
+        pointer.x = x;
+        pointer.y = y;
+      }
+      pointer.targetX = x;
+      pointer.targetY = y;
+      hoverTarget = 1;
+    }
+
+    function onPointerLeave() {
+      hoverTarget = 0;
+    }
+
+    function onContextLost(event) {
+      event.preventDefault();
+      api.destroy();
+      if (footerShader === api) footerShader = null;
+    }
+
+    var api = this;
+    applyPalette(themeName, true);
+    mark.appendChild(canvas);
+    frame.addEventListener("pointermove", onPointerMove, { passive: true });
+    frame.addEventListener("pointerdown", onPointerMove, { passive: true });
+    frame.addEventListener("pointerleave", onPointerLeave, { passive: true });
+    frame.addEventListener("pointercancel", onPointerLeave, { passive: true });
+    document.addEventListener("visibilitychange", syncRunning);
+    canvas.addEventListener("webglcontextlost", onContextLost);
+
+    if ("IntersectionObserver" in window) {
+      observer = new IntersectionObserver(function (entries) {
+        inView = entries[0].isIntersecting;
+        syncRunning();
+      });
+      observer.observe(frame);
+    } else {
+      inView = true;
+    }
+
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
+    else measure();
+
+    if ("ResizeObserver" in window) {
+      resizeObserver = new ResizeObserver(function () { if (ready) measure(); });
+      resizeObserver.observe(mark);
+    } else {
+      window.addEventListener("resize", measure);
+    }
+    syncRunning();
+
+    this.setTheme = function (theme) {
+      applyPalette(theme, !running);
+      if (!running && ready) render(performance.now());
+    };
+    this.destroy = function () {
+      if (destroyed) return;
+      destroyed = true;
+      stop();
+      if (observer) observer.disconnect();
+      if (resizeObserver) resizeObserver.disconnect();
+      else window.removeEventListener("resize", measure);
+      frame.removeEventListener("pointermove", onPointerMove);
+      frame.removeEventListener("pointerdown", onPointerMove);
+      frame.removeEventListener("pointerleave", onPointerLeave);
+      frame.removeEventListener("pointercancel", onPointerLeave);
+      document.removeEventListener("visibilitychange", syncRunning);
+      canvas.removeEventListener("webglcontextlost", onContextLost);
+      mark.classList.remove("has-shader");
+      canvas.remove();
+    };
+  }
+
+  function initFooterShader() {
+    var frame = document.querySelector(".footer__frame");
+    var mark = document.getElementById("footer-mark");
+    if (!frame || !mark || prefersReduced() || !window.WebGLRenderingContext || !window.requestAnimationFrame) return;
+    try {
+      footerShader = new FooterShader(frame, mark);
+    } catch (e) {
+      footerShader = null;
+    }
+  }
+
   function initFooterMotion() {
     var frame = document.querySelector(".footer__frame");
     var mark = document.getElementById("footer-mark");
@@ -1025,6 +1380,7 @@
       syncThemeDots();
       updateThemeColor(themeName);
       if (dotField) dotField.setBase(THEME[themeName]["--dot"]);
+      if (footerShader) footerShader.setTheme(themeName);
     });
 
     initCardReveals(returningFromDetail);
@@ -1049,6 +1405,10 @@
           dotField = null;
           document.body.classList.remove("dotfield-on");
         }
+        if (footerShader) {
+          footerShader.destroy();
+          footerShader = null;
+        }
         return;
       }
 
@@ -1064,6 +1424,7 @@
     initHomeLenis();
     resumeHomeLenis();
     initFooterMotion();
+    initFooterShader();
     window.addEventListener("pagehide", stopHomeLenis);
   }
 
