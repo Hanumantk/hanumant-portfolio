@@ -23,7 +23,7 @@ Case-study summaries and image sequences live in:
 - `recoup-health.html`
 - `assets/images/case-studies/`
 
-The resume viewer is in `resume.html`. It uses `assets/images/resume/resume-page.png` for the smooth in-page preview and keeps `resume.pdf` as the selectable source document.
+The About me page is `about.html`, linked from the homepage hero. The resume viewer is in `resume.html`. It uses `assets/images/resume/resume-page.png` for the smooth in-page preview and keeps `resume.pdf` as the selectable source document.
 
 ## Structure
 
@@ -33,7 +33,7 @@ The resume viewer is in `resume.html`. It uses `assets/images/resume/resume-page
 | `data.js` | Homepage content source |
 | `styles.css` | Homepage tokens, layout, themes, and responsive states |
 | `main.js` | Homepage rendering, theme switch, dot field, transitions, and motion |
-| `detail.css` | Shared case-study and resume presentation |
+| `detail.css` | Shared case-study, about, and resume presentation |
 | `detail.js` | Shared case-study progress, Lenis integration, return state, and resume loading state |
 | `robots.txt` / `sitemap.xml` | Search-engine discovery |
 
