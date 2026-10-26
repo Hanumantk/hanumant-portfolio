@@ -838,6 +838,18 @@ body.is-project-opening .group.is-opening {
   user-select: none;
 }
 
+.footer__mark.has-shader {
+  color: transparent;
+}
+
+.footer__mark-canvas {
+  position: absolute;
+  left: 0;
+  display: block;
+  width: 100%;
+  pointer-events: none;
+}
+
 @media (min-width: 900px) {
   .footer__socials {
     flex-direction: row;
