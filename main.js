@@ -517,6 +517,24 @@
     renderCards("work-feed-grid", typeof WORK_EXPERIENCE === "undefined" ? [] : WORK_EXPERIENCE, "experience");
   }
 
+  function buildAbout() {
+    var about = SITE.about;
+    if (!about) return;
+    var label = about.label || "About me";
+    document.getElementById("about-feed-label").textContent = label;
+    document.getElementById("about-feed-tab").textContent = label;
+
+    function renderParagraphs(id, paragraphs) {
+      var node = document.getElementById(id);
+      if (!node) return;
+      node.textContent = "";
+      (paragraphs || []).forEach(function (paragraph) { node.appendChild(createElement("p", "", paragraph)); });
+    }
+
+    renderParagraphs("about-lead", about.lead);
+    renderParagraphs("about-body", about.paragraphs);
+  }
+
   function buildFooter() {
     var footer = SITE.footer || {};
     var list = document.getElementById("footer-socials");
@@ -1010,6 +1028,7 @@
 
     buildHero();
     buildFeed();
+    buildAbout();
     buildFooter();
     syncThemeDots();
     updateThemeColor(themeName);

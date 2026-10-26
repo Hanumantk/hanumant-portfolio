@@ -14,7 +14,7 @@ Opening `index.html` directly also works, although a local server more closely m
 
 ## Content
 
-Homepage copy, links, project titles, categories, cover paths, and footer links live in `data.js`. The same essential content is also present in `index.html` as a resilient no-JavaScript first frame; keep the two in sync when changing public copy.
+Homepage copy, links, project titles, categories, cover paths, About me text, and footer links live in `data.js`. The same essential content is also present in `index.html` as a resilient no-JavaScript first frame; keep the two in sync when changing public copy.
 
 Case-study summaries and image sequences live in:
 

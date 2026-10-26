@@ -669,6 +669,28 @@ a {
   }
 }
 
+.feed__grid.about {
+  row-gap: 1.75rem;
+}
+
+.about__lead {
+  color: var(--c-heading);
+  font-family: "Poppins", "Public Sans", ui-sans-serif, system-ui, sans-serif;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.about__body {
+  color: var(--c-body);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+.about__body p + p {
+  margin-top: 1.2em;
+}
+
 .group-wrap,
 .group {
   min-width: 0;
