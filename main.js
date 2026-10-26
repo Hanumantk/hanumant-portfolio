@@ -91,13 +91,9 @@
   var pageIsInert = false;
   var curtainCoversHero = false;
 
-  function systemTheme() {
-    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-  }
-
   function currentTheme() {
     var explicit = root.getAttribute("data-theme");
-    return explicit === "light" || explicit === "dark" ? explicit : systemTheme();
+    return explicit === "dark" ? "dark" : "light";
   }
 
   var themeName = currentTheme();
@@ -232,7 +228,7 @@
     if (footerShader) footerShader.setTheme(next);
     themeTransitionId += 1;
     var transitionId = themeTransitionId;
-    try { localStorage.setItem("theme", next); } catch (e) {}
+    try { sessionStorage.setItem("theme", next); } catch (e) {}
     syncThemeDots();
 
     var canAnimate = animate && !prefersReduced() && !document.hidden;
@@ -1471,15 +1467,6 @@
       dot.addEventListener("click", function () { setTheme(dot.getAttribute("data-theme-set"), true, dot); });
     });
 
-    var systemQuery = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
-    addMediaListener(systemQuery, function () {
-      if (root.hasAttribute("data-theme")) return;
-      themeName = systemTheme();
-      syncThemeDots();
-      updateThemeColor(themeName);
-      if (dotField) dotField.setBase(THEME[themeName]["--dot"]);
-      if (footerShader) footerShader.setTheme(themeName);
-    });
 
     initCardReveals(returningFromDetail);
 

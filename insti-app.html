@@ -8,7 +8,7 @@
         try {
           var root = document.documentElement;
           root.classList.add("js");
-          var savedTheme = localStorage.getItem("theme");
+          var savedTheme = sessionStorage.getItem("theme");
           if (savedTheme === "light" || savedTheme === "dark") root.setAttribute("data-theme", savedTheme);
           if (sessionStorage.getItem("project-fallback-entry") === "1") {
             sessionStorage.removeItem("project-fallback-entry");

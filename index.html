@@ -58,7 +58,8 @@
         }
 
         try {
-          var savedTheme = localStorage.getItem("theme");
+          localStorage.removeItem("theme");
+          var savedTheme = sessionStorage.getItem("theme");
           if (savedTheme === "light" || savedTheme === "dark") root.setAttribute("data-theme", savedTheme);
           if (!isReload && sessionStorage.getItem("skip-home-intro-once") === "1") root.classList.add("skip-home-intro");
         } catch (e) {}
