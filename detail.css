@@ -299,6 +299,7 @@ summary {
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: end;
   max-width: none;
+  margin-top: clamp(0.5rem, 2vw, 1.25rem);
   gap: 1.5rem;
 }
 
