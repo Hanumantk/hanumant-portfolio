@@ -736,6 +736,61 @@
     holdTimer = window.setTimeout(finishIntro, 1320);
   }
 
+  // Shared with the footer shader's look: the same noise flow, sampled per dot on the CPU.
+  var HERO_FLOW = {
+    light: { low: parseColor("#4aa8ff"), mid: parseColor("#1f7ae0"), high: parseColor("#00489f"), splitA: "255,92,214", splitB: "38,214,255" },
+    dark: { low: parseColor("#2f6fc4"), mid: parseColor("#4aa8ff"), high: parseColor("#a8d4ff"), splitA: "255,92,214", splitB: "38,214,255" }
+  };
+
+  function fract(value) {
+    return value - Math.floor(value);
+  }
+
+  function smoothstep(edge0, edge1, value) {
+    var amount = Math.max(0, Math.min(1, (value - edge0) / (edge1 - edge0)));
+    return amount * amount * (3 - 2 * amount);
+  }
+
+  function hash2(x, y) {
+    var px = fract(x * 123.34);
+    var py = fract(y * 456.21);
+    var shift = px * (px + 45.32) + py * (py + 45.32);
+    return fract((px + shift) * (py + shift));
+  }
+
+  function valueNoise(x, y) {
+    var ix = Math.floor(x);
+    var iy = Math.floor(y);
+    var fx = x - ix;
+    var fy = y - iy;
+    var ux = fx * fx * (3 - 2 * fx);
+    var uy = fy * fy * (3 - 2 * fy);
+    var top = hash2(ix, iy) + (hash2(ix + 1, iy) - hash2(ix, iy)) * ux;
+    var bottom = hash2(ix, iy + 1) + (hash2(ix + 1, iy + 1) - hash2(ix, iy + 1)) * ux;
+    return top + (bottom - top) * uy;
+  }
+
+  function fbm(x, y) {
+    var value = 0;
+    var amplitude = 0.5;
+    for (var i = 0; i < 4; i += 1) {
+      value += amplitude * valueNoise(x, y);
+      x = x * 2.03 + 1.7;
+      y = y * 2.03 + 9.2;
+      amplitude *= 0.5;
+    }
+    return value;
+  }
+
+  function flowColor(x, y, time, palette) {
+    var nx = x / 200;
+    var ny = y / 200;
+    var wx = fbm(nx * 1.1, ny * 1.1 + time * 0.07);
+    var wy = fbm(nx * 1.1 + 5.2, ny * 1.1 - time * 0.06);
+    var f = fbm(nx * 1.5 + wx * 1.6 + time * 0.05, ny * 1.5 + wy * 1.6);
+    return mixColor(mixColor(palette.low, palette.mid, smoothstep(0.32, 0.62, f)), palette.high, smoothstep(0.5, 0.78, f));
+  }
+
   function DotField(hero) {
     var canvas = createElement("canvas", "dotfield");
     canvas.setAttribute("aria-hidden", "true");
@@ -743,6 +798,8 @@
     var context = canvas.getContext("2d");
     var spacing = 68;
     var radius = 185;
+    var glowSpread = 2 * Math.pow(radius * 0.6, 2);
+    var hover = 0;
     var baseRadius = 2;
     var dots = [];
     var width = 0;
@@ -828,6 +885,10 @@
     function draw(now) {
       context.clearRect(0, 0, width, height);
       var moving = false;
+      var time = (now || performance.now()) / 1000;
+      var palette = HERO_FLOW[themeName] || HERO_FLOW.light;
+      hover += ((pointer.active ? 1 : 0) - hover) * 0.08;
+      if (hover < 0.002) hover = 0;
       dots.forEach(function (dot) {
         var alpha = verticalAlpha(dot.homeY / height) * 0.62 * contentClear(dot);
         if (alpha <= 0.008) return;
@@ -860,17 +921,51 @@
         if (velocityMoving || returningHome) moving = true;
 
         var color = base;
-        var dotRadius = baseRadius;
-        if (proximity > 0.01) {
-          color = mixColor(base, [74, 168, 255, 1], Math.min(proximity * 1.5, 1));
-          dotRadius += proximity * 1.6;
+        var dotRadius = baseRadius + proximity * 1.6;
+        var dotAlpha = alpha;
+        var drawX = dot.x;
+        var drawY = dot.y;
+        var glow = 0;
+        var dirX = 0;
+        var dirY = 0;
+        if (hover > 0) {
+          var gx = dot.homeX - pointer.x;
+          var gy = dot.homeY - pointer.y;
+          var gd = Math.sqrt(gx * gx + gy * gy);
+          glow = hover * Math.exp(-gd * gd / glowSpread);
+        }
+        if (glow > 0.004) {
+          dirX = gx / (gd || 1);
+          dirY = gy / (gd || 1);
+          var ripple = Math.sin(gd / 34 - time * 5) * Math.min(gd / 30, 1);
+          drawX += dirX * ripple * 5 * glow;
+          drawY += dirY * ripple * 5 * glow;
+          color = mixColor(base, flowColor(dot.homeX, dot.homeY, time, palette), Math.min(glow * (1.5 + 0.35 * ripple), 1));
+          dotRadius *= 1 + glow * 0.8;
+          dotAlpha = Math.min(1, alpha * (1 + glow * 0.6));
+        } else {
+          glow = 0;
+        }
+
+        var drawRadius = dotRadius * (0.4 + 0.6 * igniteAmount);
+        var split = glow * 4;
+        if (split > 0.4) {
+          var ghostAlpha = (dotAlpha * igniteAmount * Math.min(glow * 1.6, 1) * 0.85).toFixed(3);
+          context.beginPath();
+          context.arc(drawX + dirX * split, drawY + dirY * split, drawRadius, 0, Math.PI * 2);
+          context.fillStyle = "rgba(" + palette.splitA + "," + ghostAlpha + ")";
+          context.fill();
+          context.beginPath();
+          context.arc(drawX - dirX * split, drawY - dirY * split, drawRadius, 0, Math.PI * 2);
+          context.fillStyle = "rgba(" + palette.splitB + "," + ghostAlpha + ")";
+          context.fill();
         }
         context.beginPath();
-        context.arc(dot.x, dot.y, dotRadius * (0.4 + 0.6 * igniteAmount), 0, Math.PI * 2);
-        context.fillStyle = "rgba(" + Math.round(color[0]) + "," + Math.round(color[1]) + "," + Math.round(color[2]) + "," + (alpha * igniteAmount).toFixed(3) + ")";
+        context.arc(drawX, drawY, drawRadius, 0, Math.PI * 2);
+        context.fillStyle = "rgba(" + Math.round(color[0]) + "," + Math.round(color[1]) + "," + Math.round(color[2]) + "," + (dotAlpha * igniteAmount).toFixed(3) + ")";
         context.fill();
       });
-      if (running && (moving || igniting)) rafId = requestAnimationFrame(draw);
+      if (running && (moving || igniting || hover > 0)) rafId = requestAnimationFrame(draw);
       else rafId = null;
     }
 
