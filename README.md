@@ -43,7 +43,7 @@ The About me page is `about.html`, linked from the homepage hero. The resume vie
 - Self-hosted Lenis 1.3.26 is the only smooth-scroll engine and runs on the long case-study and resume pages. Its case-study frame loop is synchronized with GSAP.
 - The footer wordmark is redrawn by a WebGL shader (`FooterShader` in `main.js`): flowing brand-blue color inside the letters, a rippling lens with color split around the pointer, and a left-to-right color reveal on first view. It only renders while the footer is on screen, and the plain text remains when WebGL is unavailable or reduced motion is on.
 - The hero dot field borrows the footer shader's style near the cursor: dots take the same noise-driven blue flow, ripple outward, and split into pink and cyan edges.
-- The theme choice persists in `localStorage`; the saved theme is applied before paint.
+- Every visit opens in light mode. A theme chosen with the toggle persists in `sessionStorage` for the rest of that visit and is applied before paint on every page.
 - Project and resume return links skip the branded loader and restore the saved homepage viewport.
 - Reduced-motion, keyboard focus, browser zoom, safe-area insets, and no-JavaScript states are supported.
 

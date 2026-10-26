@@ -42,25 +42,6 @@
   color-scheme: dark;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --grad-top: #1b2a3c;
-    --grad-bottom: #000000;
-    --dot: #8f98a2;
-    --c-heading: #ffffff;
-    --c-body: #d6dbe1;
-    --c-text: #f1f3f6;
-    --c-muted: #a7b0bb;
-    --c-link: #63adff;
-    --c-accent: #4097ff;
-    --c-focus: #76b8ff;
-    --c-control-dot: #9da6b0;
-    --c-border: rgba(220, 230, 245, 0.19);
-    --c-card: #14202e;
-    --c-mark: #0e1621;
-    color-scheme: dark;
-  }
-}
 
 * {
   box-sizing: border-box;

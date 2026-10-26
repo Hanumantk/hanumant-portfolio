@@ -16,7 +16,7 @@
   function syncThemeColor() {
     var meta = document.querySelector('meta[name="theme-color"]');
     if (!meta) return;
-    var dark = root.getAttribute("data-theme") === "dark" || (!root.hasAttribute("data-theme") && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    var dark = root.getAttribute("data-theme") === "dark";
     meta.setAttribute("content", dark ? "#1b2a3c" : "#cde4ff");
   }
 
