@@ -25,28 +25,13 @@ const SITE = {
     { label: "LinkedIn", href: "https://www.linkedin.com/in/hanumant-kulkarni-b0b96631a/", icon: "linkedin", col: 1, accent: true },
     { label: "Behance",  href: "https://www.behance.net/hanumankulkarn1",                   icon: "behance",  col: 1, accent: true },
     { label: "Resume",   href: "resume.html",                                                icon: "resume",   col: 2, accent: true },
-    { label: "About me", href: "#about",                                                     icon: "arrow",    col: 2, accent: false },
+    { label: "About me", href: "about.html",                                                 icon: "arrow",    col: 2, accent: true },
   ],
 
   // ---- Homepage section labels -----------------------------
   indexLabel: "Index",
   category: "Projects",
   workCategory: "Work Experience",
-
-  // ---- About me --------------------------------------------
-  // `lead` sits in the left grid column, `paragraphs` in the right.
-  about: {
-    label: "About me",
-    lead: [
-      "I am Hanumant Kulkarni.",
-      "I am from Chhatrapati Sambhajinagar.",
-    ],
-    paragraphs: [
-      "I have always been curious about how things are made. As a kid I would take my toys apart to see what was inside, and cars fascinated me the most, so after school I did a diploma in automobile engineering. Somewhere in those years, that curiosity moved towards how people interact with these products, and whether they make sense to the person using them. That led me to design, and to the Industrial Design Centre at IIT&nbsp;Bombay.",
-      "At IDC I have worked as a designer with DevCom, the institute’s developer community, on products students use every day, like Reach and the Insti app. Alongside, I have designed an app for a healthcare startup and interned in graphic design at Recoup Health. Before joining college, I also worked as an analyst at Mphasis. That was my first time in a corporate setup, and I learned a lot there about how things actually get done.",
-      "Outside of all this, I am really into watches and Hotwheels, and I like to play chess.",
-    ],
-  },
 
   // ---- Footer ----------------------------------------------
   footer: {
