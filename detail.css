@@ -317,9 +317,9 @@ summary {
 }
 
 .about__body {
-  max-width: 62ch;
+  max-width: 70ch;
   color: var(--body);
-  font-size: clamp(1rem, 2vw, 1.06rem);
+  font-size: 20px;
   line-height: 1.7;
 }
 
