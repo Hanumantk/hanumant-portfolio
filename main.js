@@ -739,7 +739,7 @@
   // Shared with the footer shader's look: the same noise flow, sampled per dot on the CPU.
   var HERO_FLOW = {
     light: { low: parseColor("#4aa8ff"), mid: parseColor("#1f7ae0"), high: parseColor("#00489f"), splitA: "255,92,214", splitB: "38,214,255" },
-    dark: { low: parseColor("#2f6fc4"), mid: parseColor("#4aa8ff"), high: parseColor("#a8d4ff"), splitA: "255,92,214", splitB: "38,214,255" }
+    dark: { low: parseColor("#2f6fc4"), mid: parseColor("#4aa8ff"), high: parseColor("#a8d4ff"), splitA: null, splitB: null }
   };
 
   function fract(value) {
@@ -953,11 +953,14 @@
           var ghostAlpha = (dotAlpha * igniteAmount * Math.min(glow * 1.6, 1) * 0.85).toFixed(3);
           context.beginPath();
           context.arc(drawX + dirX * split, drawY + dirY * split, drawRadius, 0, Math.PI * 2);
-          context.fillStyle = "rgba(" + palette.splitA + "," + ghostAlpha + ")";
+          // On a dark backdrop the footer's per-channel split drops a channel per side, so derive the ghosts from the dot color.
+          var splitA = palette.splitA || Math.round(color[0]) + "," + Math.round(color[1]) + ",0";
+          var splitB = palette.splitB || "0," + Math.round(color[1]) + "," + Math.round(color[2]);
+          context.fillStyle = "rgba(" + splitA + "," + ghostAlpha + ")";
           context.fill();
           context.beginPath();
           context.arc(drawX - dirX * split, drawY - dirY * split, drawRadius, 0, Math.PI * 2);
-          context.fillStyle = "rgba(" + palette.splitB + "," + ghostAlpha + ")";
+          context.fillStyle = "rgba(" + splitB + "," + ghostAlpha + ")";
           context.fill();
         }
         context.beginPath();
